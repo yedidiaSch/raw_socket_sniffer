@@ -1,0 +1,82 @@
+cmake_minimum_required(VERSION 3.10)
+
+project(Sniffer 
+    VERSION 1.0.0
+    DESCRIPTION "Network Packet Sniffer"
+    LANGUAGES C
+)
+
+# Set C standard
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+
+# Compiler warnings
+if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+    add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+# Source files
+set(SOURCES
+    main.c
+    socket/rawSocket.c
+    core/packetParser.c
+    layers/L2_DataLink/ethernetLayer.c
+    layers/L3_Network/networkLayer.c
+    layers/L4_Transport/transportLayer.c
+    common/utils.c
+    common/logger.c
+)
+
+# Header files
+set(HEADERS
+    common/Types.h
+    socket/rawSocket.h
+    core/packetParser.h
+    layers/L2_DataLink/ethernetLayer.h
+    layers/L3_Network/networkLayer.h
+    layers/L4_Transport/transportLayer.h
+    common/utils.h
+    common/logger.h
+)
+
+# Create executable
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+
+# Include directories
+target_include_directories(${PROJECT_NAME} PRIVATE 
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/common
+    ${CMAKE_CURRENT_SOURCE_DIR}/socket
+    ${CMAKE_CURRENT_SOURCE_DIR}/core
+    ${CMAKE_CURRENT_SOURCE_DIR}/layers/L2_DataLink
+    ${CMAKE_CURRENT_SOURCE_DIR}/layers/L3_Network
+    ${CMAKE_CURRENT_SOURCE_DIR}/layers/L4_Transport
+)
+
+# Build type configuration
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+endif()
+
+# Debug flags
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g -O0 -DDEBUG")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2")
+
+# Installation rules
+install(TARGETS ${PROJECT_NAME}
+    RUNTIME DESTINATION bin
+)
+
+# Print build info
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "C Compiler: ${CMAKE_C_COMPILER}")
+
+# Custom run target
+add_custom_target(run
+    COMMAND $<TARGET_FILE:${PROJECT_NAME}>
+    DEPENDS ${PROJECT_NAME}
+    WORKING_DIRECTORY ${CMAKE_PROJECT_DIR}
+    COMMENT "Running ${PROJECT_NAME}..."
+    USES_TERMINAL
+)
+
