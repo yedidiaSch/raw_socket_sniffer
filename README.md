@@ -1,74 +1,81 @@
 # Network Packet Sniffer
 
+![Platform](https://img.shields.io/badge/platform-Linux-green.svg)
+![License](https://img.shields.io/badge/license-MIT-orange.svg)
+
 A raw socket-based network packet sniffer written in C for Linux. This tool captures network traffic on a specified interface and parses Ethernet, IP, TCP, and UDP headers.
 
 ## Features
 
 - **Raw Socket Capture**: Uses `AF_PACKET` sockets to capture traffic at the lowest level.
 - **Multi-Layer Parsing**:
-  - **Layer 2 (Ethernet)**: MAC addresses and EtherType.
-  - **Layer 3 (IP)**: Source/Destination IP addresses and Protocol.
-  - **Layer 4 (Transport)**: TCP (Ports, Flags) and UDP (Ports, Length).
-- **Modular Design**: Separate modules for each network layer.
-- **CMake Build System**: Easy to build and extend.
+  - **Layer 2 (Data Link)**: Ethernet II (MAC Source/Dest, EtherType).
+  - **Layer 3 (Network)**: IPv4 (IP Source/Dest, Protocol).
+  - **Layer 4 (Transport)**: TCP (Ports, Flags) & UDP (Ports, Length).
+- **Modular Design**: Clean separation of concerns with a dedicated `layers/` directory.
+- **Logging**: Integrated logging system for packet details and application status.
 
 ## Prerequisites
 
-- **OS**: Linux (requires `AF_PACKET` support).
-- **Compiler**: GCC or Clang (C11 support).
-- **Build System**: CMake (3.10+).
-- **Privileges**: Root/Sudo access is required to open raw sockets.
+- **Operating System**: Linux (Kernel with `AF_PACKET` support).
+- **Compiler**: GCC or Clang (supporting C11).
+- **Build System**: CMake 3.10 or higher.
+- **Permissions**: Root/Sudo privileges are required to open raw sockets.
 
-## Build and Run
+## Build Instructions
 
-The project uses CMake. A convenience target `run` is provided to build and execute in one step.
+The project uses CMake for building.
 
-### 1. Build and Run (Recommended)
+1.  **Create a build directory:**
+    ```bash
+    mkdir -p build
+    cd build
+    ```
+
+2.  **Configure the project:**
+    ```bash
+    cmake ..
+    ```
+
+3.  **Build the executable:**
+    ```bash
+    make
+    ```
+
+## Usage
+
+The application requires the network interface name as a command-line argument.
 
 ```bash
-mkdir -p build
-cd build
-cmake ..
-sudo make run
+sudo ./Sniffer <interface_name>
 ```
 
-*Note: `sudo` is usually required for raw socket permissions.*
+### Examples
 
-### 2. Manual Build
-
+Capture packets on the `eth0` interface:
 ```bash
-mkdir -p build
-cd build
-cmake ..
-make
+sudo ./Sniffer eth0
 ```
 
-Then run the executable:
+Capture packets on the wireless interface (e.g., `wlp2s0`):
 ```bash
-sudo ./Sniffer
+sudo ./Sniffer wlp2s0
 ```
 
-## Configuration
-
-The network interface is currently set in `main.c`.
-Default: `wlp2s0`
-
-To change it, edit `main.c`:
-```c
-const char* interface = "eth0"; // Change to your interface
-```
+*Note: You can find your available network interfaces using the `ip link` or `ifconfig` command.*
 
 ## Project Structure
 
 ```
 Sniffer/
-├── main.c              # Entry point and main loop
-├── rawSocket.c         # Raw socket creation and configuration
-├── packetParser.c      # Central orchestrator for packet parsing
-├── ethernetLayer.c     # Layer 2 parsing logic
-├── networkLayer.c      # Layer 3 (IP) parsing logic
-├── transportLayer.c    # Layer 4 (TCP/UDP) parsing logic
-├── utils.c             # Helper functions (e.g., MAC printing)
-├── Types.h             # Common type definitions
-└── CMakeLists.txt      # Build configuration
+├── common/           # Utilities, logging, and type definitions
+├── core/             # Central packet parsing orchestration
+├── layers/           # Protocol implementations (Ethernet, IP, TCP/UDP)
+├── socket/           # Raw socket creation and management
+├── main.c            # Application entry point and argument parsing
+└── CMakeLists.txt    # Build configuration
 ```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

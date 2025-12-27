@@ -81,7 +81,7 @@ void init_logger() {
     if (logger_running) return;
     
     // Initialize UDP Sender (Hardcoded for now as per request context, or could be args)
-    init_udp_sender("127.0.0.1", 5000);
+    init_udp_sender("127.0.0.1", 5005);
 
     logger_running = 1;
     if (pthread_create(&logger_thread, NULL, logger_worker, NULL) != 0) {
