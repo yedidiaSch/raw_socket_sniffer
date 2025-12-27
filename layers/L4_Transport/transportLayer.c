@@ -11,6 +11,7 @@
 #include <netinet/icmp6.h>
 #include <arpa/inet.h>
 #include "transportLayer.h"
+#include "logger.h"
 
 /**
  * @brief Parses TCP header.
@@ -21,13 +22,13 @@
 void parse_tcp(const unsigned char* buffer, int size) {
     // Check if we have enough bytes for the TCP header
     if (size < (int)sizeof(struct tcphdr)) {
-        printf("      [Layer 4 - TCP] Packet too short for TCP header\n");
+        log_message("      [Layer 4 - TCP] Packet too short for TCP header\n");
         return;
     }
 
     struct tcphdr *tcph = (struct tcphdr *)buffer;
 
-    printf("      [Layer 4 - TCP] Port: %d -> %d | Flags: [%s%s%s%s]\n", 
+    log_message("      [Layer 4 - TCP] Port: %d -> %d | Flags: [%s%s%s%s]\n", 
            ntohs(tcph->source), 
            ntohs(tcph->dest),
            (tcph->syn ? "SYN " : ""),
@@ -45,13 +46,13 @@ void parse_tcp(const unsigned char* buffer, int size) {
 void parse_udp(const unsigned char* buffer, int size) {
     // Check if we have enough bytes for the UDP header
     if (size < (int)sizeof(struct udphdr)) {
-        printf("      [Layer 4 - UDP] Packet too short for UDP header\n");
+        log_message("      [Layer 4 - UDP] Packet too short for UDP header\n");
         return;
     }
 
     struct udphdr *udph = (struct udphdr *)buffer;
 
-    printf("      [Layer 4 - UDP] Port: %d -> %d | Len: %d\n", 
+    log_message("      [Layer 4 - UDP] Port: %d -> %d | Len: %d\n", 
            ntohs(udph->source), 
            ntohs(udph->dest),
            ntohs(udph->len));
@@ -65,13 +66,13 @@ void parse_udp(const unsigned char* buffer, int size) {
  */
 void parse_icmp(const unsigned char* buffer, int size) {
     if (size < (int)sizeof(struct icmphdr)) {
-        printf("      [Layer 4 - ICMP] Packet too short\n");
+        log_message("      [Layer 4 - ICMP] Packet too short\n");
         return;
     }
 
     struct icmphdr *icmph = (struct icmphdr *)buffer;
 
-    printf("      [Layer 4 - ICMP] Type: %d | Code: %d\n", 
+    log_message("      [Layer 4 - ICMP] Type: %d | Code: %d\n", 
            icmph->type, icmph->code);
 }
 
@@ -83,12 +84,12 @@ void parse_icmp(const unsigned char* buffer, int size) {
  */
 void parse_icmpv6(const unsigned char* buffer, int size) {
     if (size < (int)sizeof(struct icmp6_hdr)) {
-        printf("      [Layer 4 - ICMPv6] Packet too short\n");
+        log_message("      [Layer 4 - ICMPv6] Packet too short\n");
         return;
     }
 
     struct icmp6_hdr *icmp6h = (struct icmp6_hdr *)buffer;
 
-    printf("      [Layer 4 - ICMPv6] Type: %d | Code: %d\n", 
+    log_message("      [Layer 4 - ICMPv6] Type: %d | Code: %d\n", 
            icmp6h->icmp6_type, icmp6h->icmp6_code);
 }

@@ -1,16 +1,127 @@
 /**
  * @file logger.c
- * @brief Implementation of logging functions.
+ * @brief Implementation of thread-safe logging functions.
  */
 
+#define _GNU_SOURCE
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdarg.h>
+#include <pthread.h>
+#include <unistd.h>
 #include "logger.h"
 
+// --- Queue Structure ---
+typedef struct LogNode {
+    char* message;
+    struct LogNode* next;
+} LogNode;
+
+static LogNode* head = NULL;
+static LogNode* tail = NULL;
+
+// --- Synchronization ---
+static pthread_mutex_t queue_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t queue_cond = PTHREAD_COND_INITIALIZER;
+static pthread_t logger_thread;
+static volatile int logger_running = 0;
+
 /**
- * @brief Logs a message to stdout.
- * 
- * @param msg The message string to log.
+ * @brief The main loop for the logger thread.
  */
-void log_message(const char* msg) {
-    printf("[LOG]: %s\n", msg);
+static void* logger_worker(void* arg) {
+    
+    (void)arg;
+    
+    while (1) {
+        pthread_mutex_lock(&queue_mutex);
+
+        // Wait for data or shutdown signal
+        while (head == NULL && logger_running) {
+            pthread_cond_wait(&queue_cond, &queue_mutex);
+        }
+
+        // If shutdown and empty, exit
+        if (!logger_running && head == NULL) {
+            pthread_mutex_unlock(&queue_mutex);
+            break;
+        }
+
+        // Pop message
+        LogNode* node = head;
+        head = node->next;
+        if (head == NULL) {
+            tail = NULL;
+        }
+
+        pthread_mutex_unlock(&queue_mutex);
+
+        // Process message (IO operation outside lock)
+        if (node) {
+            printf("%s", node->message); // Message already contains newline if needed
+            free(node->message);
+            free(node);
+        }
+    }
+    return NULL;
+}
+
+void init_logger() {
+    if (logger_running) return;
+    
+    logger_running = 1;
+    if (pthread_create(&logger_thread, NULL, logger_worker, NULL) != 0) {
+        perror("Failed to create logger thread");
+        exit(1);
+    }
+}
+
+void cleanup_logger() {
+    pthread_mutex_lock(&queue_mutex);
+    logger_running = 0;
+    pthread_cond_signal(&queue_cond);
+    pthread_mutex_unlock(&queue_mutex);
+
+    pthread_join(logger_thread, NULL);
+}
+
+void log_message(const char* fmt, ...) {
+    if (!logger_running) return;
+
+    va_list args;
+    
+    // Determine required size
+    va_start(args, fmt);
+    int size = vsnprintf(NULL, 0, fmt, args);
+    va_end(args);
+
+    if (size < 0) return;
+
+    char* buffer = (char*)malloc(size + 1);
+    if (!buffer) return;
+
+    va_start(args, fmt);
+    vsnprintf(buffer, size + 1, fmt, args);
+    va_end(args);
+
+    // Create node
+    LogNode* node = (LogNode*)malloc(sizeof(LogNode));
+    if (!node) {
+        free(buffer);
+        return;
+    }
+    node->message = buffer;
+    node->next = NULL;
+
+    // Push to queue
+    pthread_mutex_lock(&queue_mutex);
+    if (tail) {
+        tail->next = node;
+        tail = node;
+    } else {
+        head = tail = node;
+    }
+    pthread_cond_signal(&queue_cond);
+    pthread_mutex_unlock(&queue_mutex);
 }

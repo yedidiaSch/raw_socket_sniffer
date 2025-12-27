@@ -11,6 +11,7 @@
 #include "ethernetLayer.h"
 #include "networkLayer.h"
 #include "transportLayer.h"
+#include "logger.h"
 
 /**
  * @brief Processes a captured packet.
@@ -53,7 +54,7 @@ void process_packet(const unsigned char* buffer, int size) {
     
     if(eth_type < 1536) {
         // IEEE 802.3 Length field - Not handled
-        printf("\n=== Non-IP Packet (IEEE 802.3 Length: %d) ===\n", eth_type);
+        log_message("\n=== Non-IP Packet (IEEE 802.3 Length: %d) ===\n", eth_type);
         return;
     }
     
@@ -72,7 +73,7 @@ void process_packet(const unsigned char* buffer, int size) {
             parse_icmpv6(transport_buffer, transport_remaining_size);
             break;
         default:
-            // printf("      [Layer 4] Unknown Protocol: %d\n", protocol);
+            // log_message("      [Layer 4] Unknown Protocol: %d\n", protocol);
             break;
     }
 }

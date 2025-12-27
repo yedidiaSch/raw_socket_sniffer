@@ -9,6 +9,7 @@
 #include <arpa/inet.h>
 #include "ethernetLayer.h"
 #include "utils.h"
+#include "logger.h"
 
 /**
  * @brief Parses and prints Ethernet header information.
@@ -29,7 +30,7 @@ uint16_t parse_ethernet(const unsigned char* buffer, int size, int* header_len) 
 
     // Only print if it's IP (to reduce noise on the screen)
     if (ntohs(eth->ether_type) == ETHERTYPE_IP) {
-        printf("\n=== New IP Packet (Total Size: %d) ===\n", size);
+        log_message("\n=== New IP Packet (Total Size: %d) ===\n", size);
         print_mac_address("   [Layer 2 - Ether] Source", eth->ether_shost);
         print_mac_address("   [Layer 2 - Ether] Dest  ", eth->ether_dhost);
     }

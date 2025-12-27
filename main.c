@@ -15,6 +15,7 @@
 #include "rawSocket.h"
 #include "packetParser.h"
 #include "Types.h"
+#include "logger.h"
 
 /**
  * @brief Global flag to control the main loop execution.
@@ -42,10 +43,17 @@ void handle_signal(int signal);
  */
 int main(int argc, char** argv)
 {
-    (void)argc; // Unused parameter
-    (void)argv; // Unused parameter
+    if (argc != 2) {
+        printf("Usage: %s <interface>\n", argv[0]);
+        return 1;
+    }
 
-    printf("Sniffer started on %s\n", interface);
+    const char* interface = argv[1];
+
+    // Initialize Logger Thread
+    init_logger();
+
+    log_message("Sniffer started on %s\n", interface);
 
     // Setup signal handling (graceful shutdown)
     signal(SIGINT, handle_signal);
@@ -53,10 +61,11 @@ int main(int argc, char** argv)
     int sock_fd = create_raw_socket(interface);
 
     // print the sock fd
-    printf("Socket FD: %d\n", sock_fd);
+    log_message("Socket FD: %d\n", sock_fd);
 
     if (sock_fd == -1) 
     {
+        cleanup_logger();
         return 1;
     }
 
@@ -64,7 +73,7 @@ int main(int argc, char** argv)
     unsigned char buffer[BUFFER_SIZE];
     int data_size;
 
-    printf("Sniffer started on %s. Press Ctrl+C to stop.\n", interface);
+    log_message("Sniffer started on %s. Press Ctrl+C to stop.\n", interface);
 
     // The Infinite Loop
     while (keep_running) {
@@ -84,12 +93,14 @@ int main(int argc, char** argv)
 
         // B. Process packet (Placeholder for next step)
         // Here we will call: process_packet(buffer, data_size);
-        printf("Received packet of size: %d bytes\n", data_size);
+        log_message("Received packet of size: %d bytes\n", data_size);
     }
 
     // Cleanup
     close(sock_fd);
-    printf("Sniffer stopped. Socket closed.\n");
+    log_message("Sniffer stopped. Socket closed.\n");
+    
+    cleanup_logger();
 
     return 0;
 }
@@ -103,7 +114,8 @@ int main(int argc, char** argv)
  */
 void handle_signal(int signal) {
     if (signal == SIGINT) {
-        printf("\nCaught signal, stopping sniffer...\n");
+        // Use printf here as it's signal safe-ish (though strictly write() is better)
+        // But for this simple logger, we'll just set the flag.
         keep_running = 0;
     }
 }
