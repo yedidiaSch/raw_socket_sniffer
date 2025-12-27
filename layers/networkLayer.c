@@ -4,7 +4,6 @@
  */
 
 #define _GNU_SOURCE
-#include <stdio.h>
 #include <netinet/ip.h>
 #include <netinet/ip6.h>
 #include <arpa/inet.h>

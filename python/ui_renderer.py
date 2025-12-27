@@ -3,6 +3,24 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 from rich import box
+import socket
+
+def get_service_name(port):
+    try:
+        return socket.getservbyport(port)
+    except:
+        return str(port)
+
+def decode_tcp_flags(flags_int):
+    if not flags_int: return ""
+    flags = []
+    if flags_int & 0x02: flags.append("SYN")
+    if flags_int & 0x10: flags.append("ACK")
+    if flags_int & 0x01: flags.append("FIN")
+    if flags_int & 0x04: flags.append("RST")
+    if flags_int & 0x08: flags.append("PSH")
+    if flags_int & 0x20: flags.append("URG")
+    return ",".join(flags)
 
 def create_layout():
     """
@@ -50,9 +68,18 @@ def render_packet_table(packet_history):
         elif pkt['type'] == "IPv6": proto_style = "bold purple"
 
         # Format info column (Payload snippet or Ports)
-        info = pkt.get('payload_hex', '')[:16]
-        if pkt.get('src_port', 0) > 0:
-            info = f"{pkt['src_port']}->{pkt['dest_port']} [{pkt.get('flags','')}]"
+        info = ""
+        if pkt['type'] == "TCP":
+            s_port = get_service_name(pkt.get('src_port', 0))
+            d_port = get_service_name(pkt.get('dest_port', 0))
+            flags = decode_tcp_flags(pkt.get('tcp_flags', 0))
+            info = f"{s_port} → {d_port} [{flags}]"
+        elif pkt['type'] == "UDP":
+            s_port = get_service_name(pkt.get('src_port', 0))
+            d_port = get_service_name(pkt.get('dest_port', 0))
+            info = f"{s_port} → {d_port}"
+        else:
+             info = pkt.get('payload_hex', '')[:16]
 
         table.add_row(
             pkt['timestamp'],

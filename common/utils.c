@@ -3,7 +3,6 @@
  * @brief Implementation of utility functions.
  */
 
-#include <stdio.h>
 #include "utils.h"
 #include "logger.h"
 

@@ -5,7 +5,6 @@
 
 #define _GNU_SOURCE
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
@@ -68,6 +67,7 @@ void send_udp_metadata(const PacketMetadata* meta)
         "\"type\": \"%s\","
         "\"src_port\": %d,"
         "\"dest_port\": %d,"
+        "\"tcp_flags\": %d,"
         "\"size\": %d"
         "}",
         meta->src_mac[0], meta->src_mac[1], meta->src_mac[2], meta->src_mac[3], meta->src_mac[4], meta->src_mac[5],
@@ -77,6 +77,7 @@ void send_udp_metadata(const PacketMetadata* meta)
         proto_str,
         meta->src_port,
         meta->dest_port,
+        meta->tcp_flags,
         meta->packet_size
     );
 
