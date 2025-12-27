@@ -11,10 +11,18 @@
 #include <pthread.h>
 #include <unistd.h>
 #include "logger.h"
+#include "udp_sender.h"
 
 // --- Queue Structure ---
+typedef enum {
+    LOG_TYPE_TEXT,
+    LOG_TYPE_PACKET
+} LogType;
+
 typedef struct LogNode {
-    char* message;
+    LogType type;
+    char* message;          // For text logs
+    PacketMetadata packet;  // For packet logs
     struct LogNode* next;
 } LogNode;
 
@@ -31,9 +39,7 @@ static volatile int logger_running = 0;
  * @brief The main loop for the logger thread.
  */
 static void* logger_worker(void* arg) {
-    
     (void)arg;
-    
     while (1) {
         pthread_mutex_lock(&queue_mutex);
 
@@ -59,8 +65,12 @@ static void* logger_worker(void* arg) {
 
         // Process message (IO operation outside lock)
         if (node) {
-            printf("%s", node->message); // Message already contains newline if needed
-            free(node->message);
+            if (node->type == LOG_TYPE_TEXT) {
+                printf("%s", node->message); 
+                free(node->message);
+            } else if (node->type == LOG_TYPE_PACKET) {
+                send_udp_metadata(&node->packet);
+            }
             free(node);
         }
     }
@@ -70,6 +80,9 @@ static void* logger_worker(void* arg) {
 void init_logger() {
     if (logger_running) return;
     
+    // Initialize UDP Sender (Hardcoded for now as per request context, or could be args)
+    init_udp_sender("127.0.0.1", 5000);
+
     logger_running = 1;
     if (pthread_create(&logger_thread, NULL, logger_worker, NULL) != 0) {
         perror("Failed to create logger thread");
@@ -84,6 +97,7 @@ void cleanup_logger() {
     pthread_mutex_unlock(&queue_mutex);
 
     pthread_join(logger_thread, NULL);
+    close_udp_sender();
 }
 
 void log_message(const char* fmt, ...) {
@@ -111,7 +125,31 @@ void log_message(const char* fmt, ...) {
         free(buffer);
         return;
     }
+    node->type = LOG_TYPE_TEXT;
     node->message = buffer;
+    node->next = NULL;
+
+    // Push to queue
+    pthread_mutex_lock(&queue_mutex);
+    if (tail) {
+        tail->next = node;
+        tail = node;
+    } else {
+        head = tail = node;
+    }
+    pthread_cond_signal(&queue_cond);
+    pthread_mutex_unlock(&queue_mutex);
+}
+
+void log_packet(const PacketMetadata* meta) {
+    if (!logger_running) return;
+
+    LogNode* node = (LogNode*)malloc(sizeof(LogNode));
+    if (!node) return;
+
+    node->type = LOG_TYPE_PACKET;
+    node->packet = *meta; // Copy struct
+    node->message = NULL;
     node->next = NULL;
 
     // Push to queue

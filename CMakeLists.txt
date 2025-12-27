@@ -10,6 +10,9 @@ project(Sniffer
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
+# Generate compile_commands.json for VS Code IntelliSense
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Compiler warnings
 if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     add_compile_options(-Wall -Wextra -Wpedantic)
@@ -20,11 +23,12 @@ set(SOURCES
     main.c
     socket/rawSocket.c
     core/packetParser.c
-    layers/L2_DataLink/ethernetLayer.c
-    layers/L3_Network/networkLayer.c
-    layers/L4_Transport/transportLayer.c
+    layers/ethernetLayer.c
+    layers/networkLayer.c
+    layers/transportLayer.c
     common/utils.c
     common/logger.c
+    common/udp_sender.c
 )
 
 # Header files
@@ -32,11 +36,12 @@ set(HEADERS
     common/Types.h
     socket/rawSocket.h
     core/packetParser.h
-    layers/L2_DataLink/ethernetLayer.h
-    layers/L3_Network/networkLayer.h
-    layers/L4_Transport/transportLayer.h
+    layers/ethernetLayer.h
+    layers/networkLayer.h
+    layers/transportLayer.h
     common/utils.h
     common/logger.h
+    common/udp_sender.h
 )
 
 # Create executable
@@ -52,9 +57,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/common
     ${CMAKE_CURRENT_SOURCE_DIR}/socket
     ${CMAKE_CURRENT_SOURCE_DIR}/core
-    ${CMAKE_CURRENT_SOURCE_DIR}/layers/L2_DataLink
-    ${CMAKE_CURRENT_SOURCE_DIR}/layers/L3_Network
-    ${CMAKE_CURRENT_SOURCE_DIR}/layers/L4_Transport
+    ${CMAKE_CURRENT_SOURCE_DIR}/layers
 )
 
 # Build type configuration

@@ -5,6 +5,7 @@
 
 #define _GNU_SOURCE
 #include <stdio.h>
+#include <string.h>
 #include <net/ethernet.h>
 #include <arpa/inet.h>
 #include "ethernetLayer.h"
@@ -17,9 +18,10 @@
  * @param buffer Packet buffer.
  * @param size Packet size.
  * @param header_len Pointer to store the header length.
+ * @param meta Pointer to the metadata struct to fill.
  * @return uint16_t EtherType.
  */
-uint16_t parse_ethernet(const unsigned char* buffer, int size, int* header_len) {
+uint16_t parse_ethernet(const unsigned char* buffer, int size, int* header_len, PacketMetadata* meta) {
    
     if (size < (int)sizeof(struct ether_header)) {
         return 0; 
@@ -28,12 +30,10 @@ uint16_t parse_ethernet(const unsigned char* buffer, int size, int* header_len) 
     struct ether_header *eth = (struct ether_header *)buffer;
     *header_len = sizeof(struct ether_header);
 
-    // Only print if it's IP (to reduce noise on the screen)
-    if (ntohs(eth->ether_type) == ETHERTYPE_IP) {
-        log_message("\n=== New IP Packet (Total Size: %d) ===\n", size);
-        print_mac_address("   [Layer 2 - Ether] Source", eth->ether_shost);
-        print_mac_address("   [Layer 2 - Ether] Dest  ", eth->ether_dhost);
-    }
+    // Fill Metadata
+    memcpy(meta->src_mac, eth->ether_shost, 6);
+    memcpy(meta->dest_mac, eth->ether_dhost, 6);
+    meta->ether_type = ntohs(eth->ether_type);
 
-    return ntohs(eth->ether_type);
+    return meta->ether_type;
 }

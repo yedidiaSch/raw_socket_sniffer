@@ -4,6 +4,7 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 #include <net/ethernet.h>
 #include <netinet/in.h>
 #include <netinet/ip6.h>
@@ -12,6 +13,7 @@
 #include "networkLayer.h"
 #include "transportLayer.h"
 #include "logger.h"
+#include "Types.h"
 
 /**
  * @brief Processes a captured packet.
@@ -26,9 +28,13 @@
  */
 void process_packet(const unsigned char* buffer, int size) {
     
+    PacketMetadata meta;
+    memset(&meta, 0, sizeof(PacketMetadata));
+    meta.packet_size = size;
+
     // 1. Parse Ethernet Layer
     int eth_header_len = 0;
-    uint16_t eth_type = parse_ethernet(buffer, size, &eth_header_len);
+    uint16_t eth_type = parse_ethernet(buffer, size, &eth_header_len, &meta);
 
     const unsigned char* transport_buffer = NULL;
     int transport_remaining_size = 0;
@@ -44,7 +50,7 @@ void process_packet(const unsigned char* buffer, int size) {
 
         // 3. Parse Network Layer (IPv4 or IPv6)
         // The network layer will detect the version internally
-        protocol = parse_network_layer(network_buffer, network_remaining_size, &network_header_len);
+        protocol = parse_network_layer(network_buffer, network_remaining_size, &network_header_len, &meta);
 
         // Move pointer to Transport header
         transport_buffer = network_buffer + network_header_len;
@@ -54,26 +60,27 @@ void process_packet(const unsigned char* buffer, int size) {
     
     if(eth_type < 1536) {
         // IEEE 802.3 Length field - Not handled
-        log_message("\n=== Non-IP Packet (IEEE 802.3 Length: %d) ===\n", eth_type);
         return;
     }
     
     // 4. Dispatch to Transport Layer (Common for both IPv4 and IPv6)
     switch (protocol) {
         case IPPROTO_TCP:
-            parse_tcp(transport_buffer, transport_remaining_size);
+            parse_tcp(transport_buffer, transport_remaining_size, &meta);
             break;
         case IPPROTO_UDP:
-            parse_udp(transport_buffer, transport_remaining_size);
+            parse_udp(transport_buffer, transport_remaining_size, &meta);
             break;
         case IPPROTO_ICMP:
-            parse_icmp(transport_buffer, transport_remaining_size);
+            parse_icmp(transport_buffer, transport_remaining_size, &meta);
             break;
         case IPPROTO_ICMPV6:
-            parse_icmpv6(transport_buffer, transport_remaining_size);
+            parse_icmpv6(transport_buffer, transport_remaining_size, &meta);
             break;
         default:
-            // log_message("      [Layer 4] Unknown Protocol: %d\n", protocol);
             break;
     }
+
+    // Log the aggregated metadata via UDP
+    log_packet(&meta);
 }
