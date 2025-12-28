@@ -40,20 +40,30 @@ int mhz_to_channel(int freq) {
     if (freq < 2484) return (freq - 2407) / 5;
     return (freq - 5000) / 5;
 }
-
 void parseMonitorMode(const unsigned char* buffer, int size, PacketMetadata* meta) {
-    // Lenovo V14 Hardcoded Header Check
-    if (size < 38) return; 
+    // 1. Read header length dynamically (Dynamic Radiotap Length)
+    // The second and third bytes contain the length (Little Endian)
+    if (size < 4) return;
+    uint16_t radiotap_len = *(uint16_t*)(buffer + 2);
 
-    // --- 1. Extract Physical Info (Radiotap) ---
-    uint16_t freq = *(uint16_t*)(buffer + 26);
-    meta->channel = mhz_to_channel(freq);
-    meta->signal_dbm = (int8_t)buffer[30];
+    // Protection against unreasonable lengths
+    if (radiotap_len >= size || radiotap_len < 10) return;
+
+    // --- Extract physical data (Optional - might shift if header changes, but less critical for now) ---
+    // Try to keep existing logic, frequency and signal are likely in the fixed start
+    if (radiotap_len >= 30) {
+        uint16_t freq = *(uint16_t*)(buffer + 26);
+        meta->channel = mhz_to_channel(freq);
+        meta->signal_dbm = (int8_t)buffer[30];
+    }
+
     meta->is_monitor_mode = 1;
     memset(meta->ssid, 0, sizeof(meta->ssid));
 
-    int offset = 38; // End of Radiotap Header
+    // --- Major Fix: Use dynamic length as start point ---
+    int offset = radiotap_len; 
 
+    // Check if there is enough payload for the packet itself
     if (offset + 24 >= size) return;
 
     // --- 2. Extract 802.11 Header Info ---
@@ -61,8 +71,7 @@ void parseMonitorMode(const unsigned char* buffer, int size, PacketMetadata* met
     uint8_t type = (frame_control >> 2) & 0x3;
     uint8_t subtype = (frame_control >> 4) & 0xF;
 
-    // Extract MAC Addresses (Addr1=Dest, Addr2=Source, Addr3=BSSID)
-    // Source MAC is usually at offset + 10
+    // Extract MAC (Located at Offset + 4, 10, 16)
     if (size >= offset + 16) {
         memcpy(meta->dest_mac, buffer + offset + 4, 6);
         memcpy(meta->src_mac, buffer + offset + 10, 6);
@@ -72,46 +81,42 @@ void parseMonitorMode(const unsigned char* buffer, int size, PacketMetadata* met
 
     // === MANAGEMENT FRAMES (Type 0) ===
     if (type == 0) {
-        int body_offset = offset + 24; // Skip MAC Header
+        int body_offset = offset + 24; 
         char packet_type[15] = "UNKNOWN";
         int is_ssid_frame = 0;
 
-        // A. BEACON (Subtype 8) or PROBE RESPONSE (Subtype 5)
-        // These have 12 bytes of fixed params (Timestamp etc.) before tags
-        if (subtype == 8 || subtype == 5) {
+        if (subtype == 8) { // BEACON
             body_offset += 12; 
-            strcpy(packet_type, (subtype == 8) ? "BEACON" : "PROBE_RESP");
+            strcpy(packet_type, "BEACON");
             is_ssid_frame = 1;
         }
-        // B. PROBE REQUEST (Subtype 4)
-        // Devices asking "Are you there?". Tags start IMMEDIATELY after MAC.
-        else if (subtype == 4) {
-            // No fixed params to skip!
+        else if (subtype == 4) { // PROBE REQ
             strcpy(packet_type, "PROBE_REQ");
             is_ssid_frame = 1;
         }
+        else if (subtype == 5) { // PROBE RESP
+            body_offset += 12;
+            strcpy(packet_type, "PROBE_RESP");
+            is_ssid_frame = 1;
+        }
 
-        // Parse SSID from Tags
         if (is_ssid_frame && body_offset < size) {
             while (body_offset + 2 <= size) {
                 uint8_t tag_id = buffer[body_offset];
                 uint8_t tag_len = buffer[body_offset + 1];
-                
                 if (body_offset + 2 + tag_len > size) break;
 
-                if (tag_id == 0) { // SSID Tag found
+                if (tag_id == 0) { 
                     int copy_len = (tag_len < 32) ? tag_len : 32;
-                    
                     if (copy_len > 0) {
                         memcpy(meta->ssid, buffer + body_offset + 2, copy_len);
                         meta->ssid[copy_len] = '\0';
                     } else {
-                        // Empty SSID handling
                         if (subtype == 4) snprintf(meta->ssid, sizeof(meta->ssid), "[BROADCAST]");
                         else snprintf(meta->ssid, sizeof(meta->ssid), "<HIDDEN>");
                     }
                     
-                    // --- THE MAIN LOG ---
+                    // Main Log
                     log_message("[%s] [%02X:%02X:%02X:%02X:%02X:%02X] -> '%s' | CH:%d | PWR:%d\n", 
                                 packet_type,
                                 meta->src_mac[0], meta->src_mac[1], meta->src_mac[2],
@@ -125,41 +130,34 @@ void parseMonitorMode(const unsigned char* buffer, int size, PacketMetadata* met
     }
 
     // === DATA FRAMES (Type 2) ===
-    // This shows actual internet traffic (Netflix, YouTube, etc.)
     else if (type == 2) {
-        // We can't read the data (encrypted), but we log the activity
-        // Logging every single data packet is too much, so we uncomment this only for deep debug
-        // log_message("[DATA]    [%02X:%02X:%02X:%02X:%02X:%02X] Size: %d bytes\n",
-
-        
-        // ברירת מחדל: סתם מידע מוצפן
         snprintf(meta->ssid, sizeof(meta->ssid), "[Encrypted Data]");
 
-        // --- בדיקת EAPOL (לחיצת יד) ---
-        // כותרת 802.11 רגילה היא 24 בתים. אם יש QoS (רוב המכשירים היום), היא 26.
-        int header_len = 24;
-        if ((subtype & 0x08)) header_len = 26; // Bit 3 דולק = QoS Data
-
-        // בדיקה שיש לנו מספיק מקום לקרוא את כותרת ה-LLC (עוד 8 בתים)
-        if (offset + header_len + 8 <= size) {
-            unsigned char* llc_header = (unsigned char*)(buffer + offset + header_len);
-            
-            // חתימת EAPOL:
-            // LLC SNAP: AA AA 03 00 00 00
-            // EtherType: 88 8E
-            if (llc_header[0] == 0xAA && 
-                llc_header[1] == 0xAA && 
-                llc_header[6] == 0x88 && 
-                llc_header[7] == 0x8E) {
+        // --- Full Scanner Method ---
+        // Scan the entire packet starting from the new dynamic offset
+        int found_handshake = 0;
+        
+        // Start searching a bit after the Header (say 24 bytes) until the end
+        for (int i = offset + 24; i < size - 8; i++) {
+            if (buffer[i] == 0xAA && 
+                buffer[i+1] == 0xAA &&  
+                buffer[i+2] == 0x03 &&
+                buffer[i+6] == 0x88 && 
+                buffer[i+7] == 0x8E) {
                 
-                // בינגו! תפסנו את המפתחות
-                snprintf(meta->ssid, sizeof(meta->ssid), "[HANDSHAKE]");
-                
-                // נדאג שהדגל הזה יישלח כלוג חשוב
-                log_message("[!!!] CAPTURED HANDSHAKE from %02X:%02X:%02X:%02X:%02X:%02X\n",
-                    meta->src_mac[0], meta->src_mac[1], meta->src_mac[2],
-                    meta->src_mac[3], meta->src_mac[4], meta->src_mac[5]);
+                found_handshake = 1;
+                break;
             }
+        }
+
+        if (found_handshake) {
+            snprintf(meta->ssid, sizeof(meta->ssid), "[HANDSHAKE]");
+            
+            // Victory Log
+            log_message("\n[!!!] >>> EAPOL HANDSHAKE CAPTURED! <<<\n");
+            log_message("[!!!] From: %02X:%02X:%02X:%02X:%02X:%02X\n",
+                        meta->src_mac[0], meta->src_mac[1], meta->src_mac[2],
+                        meta->src_mac[3], meta->src_mac[4], meta->src_mac[5]);
         }
     }
 }

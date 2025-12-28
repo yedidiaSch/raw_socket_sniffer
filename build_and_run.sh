@@ -74,20 +74,20 @@ if [ "$MODE_CHOICE" == "2" ]; then
     trap cleanup EXIT
 
     # --- FIXED CHANNEL CONFIGURATION (FOR HANDSHAKE CAPTURE) ---
-    echo "[*] Locking interface to Channel 12..."
-    sudo iw dev $MON_INTERFACE set channel 12
+    #echo "[*] Locking interface to Channel 12..."
+    #sudo iw dev $MON_INTERFACE set channel 12
 
     # --- OLD CHANNEL HOPPER (COMMENTED OUT) ---
-    # echo "[*] Starting Channel Hopper on $MON_INTERFACE..."
-    # (
-    #     while true; do
-    #         for channel in {1..13}; do
-    #             sudo iw dev $MON_INTERFACE set channel $channel 2>/dev/null
-    #             sleep 0.5
-    #         done
-    #     done
-    # ) &
-    # HOPPER_PID=$!
+    echo "[*] Starting Channel Hopper on $MON_INTERFACE..."
+    (
+        while true; do
+            for channel in {1..13}; do
+                sudo iw dev $MON_INTERFACE set channel $channel 2>/dev/null
+                sleep 0.1
+            done
+        done
+    ) &
+    HOPPER_PID=$!
 
     # Set interface variable for the sniffer
     CURRENT_INTERFACE=$MON_INTERFACE
