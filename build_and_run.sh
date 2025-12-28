@@ -5,6 +5,7 @@
 # Default interface
 BASE_INTERFACE=${1:-wlp2s0}
 SNIFFER_PID=""
+HOPPER_PID=""  # Initialize variable
 
 # --- Step 1: Ask User for Mode ---
 echo "========================================"
@@ -41,8 +42,6 @@ if [ "$MODE_CHOICE" == "2" ]; then
     sudo airmon-ng start $BASE_INTERFACE > /dev/null 2>&1
 
     # 3. Detect the NEW interface name (e.g., wlan0mon)
-    # We look for an interface that is NOT the base one, or just assume the standard naming
-    # Reliable method: Parse iw dev output
     MON_INTERFACE=$(iw dev | grep Interface | awk '{print $2}' | grep "mon" | head -n 1)
     
     # Fallback if detection failed, try adding 'mon' to base
@@ -57,6 +56,8 @@ if [ "$MODE_CHOICE" == "2" ]; then
         echo ""
         echo "[!] Stopping Monitor Mode..."
         if [ ! -z "$SNIFFER_PID" ]; then sudo kill $SNIFFER_PID 2>/dev/null; fi
+        
+        # Only kill hopper if it was started
         if [ ! -z "$HOPPER_PID" ]; then sudo kill $HOPPER_PID 2>/dev/null; fi
 
         # Stop airmon-ng interface
@@ -72,17 +73,21 @@ if [ "$MODE_CHOICE" == "2" ]; then
     }
     trap cleanup EXIT
 
-    # Start Channel Hopper on the MON interface
-    echo "[*] Starting Channel Hopper on $MON_INTERFACE..."
-    (
-        while true; do
-            for channel in {1..13}; do
-                sudo iw dev $MON_INTERFACE set channel $channel 2>/dev/null
-                sleep 0.5
-            done
-        done
-    ) &
-    HOPPER_PID=$!
+    # --- FIXED CHANNEL CONFIGURATION (FOR HANDSHAKE CAPTURE) ---
+    echo "[*] Locking interface to Channel 12..."
+    sudo iw dev $MON_INTERFACE set channel 12
+
+    # --- OLD CHANNEL HOPPER (COMMENTED OUT) ---
+    # echo "[*] Starting Channel Hopper on $MON_INTERFACE..."
+    # (
+    #     while true; do
+    #         for channel in {1..13}; do
+    #             sudo iw dev $MON_INTERFACE set channel $channel 2>/dev/null
+    #             sleep 0.5
+    #         done
+    #     done
+    # ) &
+    # HOPPER_PID=$!
 
     # Set interface variable for the sniffer
     CURRENT_INTERFACE=$MON_INTERFACE

@@ -8,13 +8,15 @@ A raw socket-based network packet sniffer written in C for Linux, featuring a re
 ## Features
 
 - **Raw Socket Capture**: Uses `AF_PACKET` sockets to capture traffic at the lowest level.
+- **Monitor Mode Support**: Captures and parses 802.11 management frames (Beacons, Probe Requests) and Radiotap headers.
 - **Multi-Layer Parsing**:
-  - **Layer 2 (Data Link)**: Ethernet II (MAC Source/Dest, EtherType).
+  - **Layer 2 (Data Link)**: Ethernet II (MAC Source/Dest, EtherType) and 802.11 (Radiotap, Management Frames).
   - **Layer 3 (Network)**: IPv4 (IP Source/Dest, Protocol).
   - **Layer 4 (Transport)**: TCP (Ports, Flags) & UDP (Ports, Length).
 - **Real-Time Dashboard**: A rich terminal UI written in Python that displays:
   - Live packet table.
   - Traffic statistics (Top Talkers, Protocol Distribution).
+  - WiFi Signal Strength (dBm) and SSID visualization (in Monitor Mode).
   - Total data transfer.
 - **Modular Design**: Clean separation of concerns with a dedicated `layers/` directory.
 
@@ -48,6 +50,15 @@ We provide a convenience script to build the C project and launch the dashboard 
 ```bash
 ./build_and_run.sh eth0
 ```
+### Monitor Mode Usage
+To capture WiFi management frames (Beacons, Probes), your interface must be in Monitor Mode.
+```bash
+sudo ip link set <interface> down
+sudo iw <interface> set type monitor
+sudo ip link set <interface> up
+./build_and_run.sh <interface>
+```
+
 
 This script will:
 1.  Compile the C Sniffer using CMake.

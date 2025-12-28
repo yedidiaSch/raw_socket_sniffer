@@ -130,18 +130,37 @@ void parseMonitorMode(const unsigned char* buffer, int size, PacketMetadata* met
         // We can't read the data (encrypted), but we log the activity
         // Logging every single data packet is too much, so we uncomment this only for deep debug
         // log_message("[DATA]    [%02X:%02X:%02X:%02X:%02X:%02X] Size: %d bytes\n",
-/**
- * @brief Main entry point for parsing a raw packet.
- * 
- * Orchestrates parsing starting at Layer 2 (Ethernet) or Radiotap (Monitor Mode).
- * 
- * @param buffer Pointer to the raw packet data.
- * @param size Total size of the captured packet.
- */
-        //             meta->src_mac[0], meta->src_mac[1], meta->src_mac[2],
-        //             meta->src_mac[3], meta->src_mac[4], meta->src_mac[5], size);
+
         
-        snprintf(meta->ssid, sizeof(meta->ssid), "[Data Traffic]");
+        // ברירת מחדל: סתם מידע מוצפן
+        snprintf(meta->ssid, sizeof(meta->ssid), "[Encrypted Data]");
+
+        // --- בדיקת EAPOL (לחיצת יד) ---
+        // כותרת 802.11 רגילה היא 24 בתים. אם יש QoS (רוב המכשירים היום), היא 26.
+        int header_len = 24;
+        if ((subtype & 0x08)) header_len = 26; // Bit 3 דולק = QoS Data
+
+        // בדיקה שיש לנו מספיק מקום לקרוא את כותרת ה-LLC (עוד 8 בתים)
+        if (offset + header_len + 8 <= size) {
+            unsigned char* llc_header = (unsigned char*)(buffer + offset + header_len);
+            
+            // חתימת EAPOL:
+            // LLC SNAP: AA AA 03 00 00 00
+            // EtherType: 88 8E
+            if (llc_header[0] == 0xAA && 
+                llc_header[1] == 0xAA && 
+                llc_header[6] == 0x88 && 
+                llc_header[7] == 0x8E) {
+                
+                // בינגו! תפסנו את המפתחות
+                snprintf(meta->ssid, sizeof(meta->ssid), "[HANDSHAKE]");
+                
+                // נדאג שהדגל הזה יישלח כלוג חשוב
+                log_message("[!!!] CAPTURED HANDSHAKE from %02X:%02X:%02X:%02X:%02X:%02X\n",
+                    meta->src_mac[0], meta->src_mac[1], meta->src_mac[2],
+                    meta->src_mac[3], meta->src_mac[4], meta->src_mac[5]);
+            }
+        }
     }
 }
 void process_packet(const unsigned char* buffer, int size) {
