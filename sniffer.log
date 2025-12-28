@@ -1,0 +1,403 @@
+Sniffer started on wlp2s0mon
+Socket FD: 4
+Sniffer started on wlp2s0mon. Press Ctrl+C to stop.
+[DEBUG] RAW PACKET: Size=68 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[DEBUG] RAW PACKET: Size=40 | Byte0=0x00 | Byte1=0x00 | Byte2=0x1A
+[DEBUG] RAW PACKET: Size=219 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [72:55:A6:60:DE:05] -> 'HOTmobile' | CH:6 | PWR:-85
+[DEBUG] RAW PACKET: Size=210 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [EE:2A:68:E8:D3:C3] -> '[BROADCAST]' | CH:6 | PWR:-81
+[DEBUG] RAW PACKET: Size=40 | Byte0=0x00 | Byte1=0x00 | Byte2=0x1A
+[DEBUG] RAW PACKET: Size=219 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [72:55:A6:60:DE:05] -> 'HOTmobile' | CH:6 | PWR:-80
+[DEBUG] RAW PACKET: Size=210 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [EE:2A:68:E8:D3:C3] -> '[BROADCAST]' | CH:6 | PWR:-79
+[DEBUG] RAW PACKET: Size=260 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:10 | PWR:-37
+[DEBUG] RAW PACKET: Size=210 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [3A:4F:F7:5D:A3:2A] -> '[BROADCAST]' | CH:10 | PWR:-79
+[DEBUG] RAW PACKET: Size=260 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:11 | PWR:-35
+[DEBUG] RAW PACKET: Size=260 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:12 | PWR:-34
+[DEBUG] RAW PACKET: Size=314 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [EE:CA:09:64:08:C3] -> 'מיכאל's Galaxy S22+' | CH:6 | PWR:-77
+[DEBUG] RAW PACKET: Size=260 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:10 | PWR:-41
+[DEBUG] RAW PACKET: Size=260 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:11 | PWR:-43
+[DEBUG] RAW PACKET: Size=260 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:12 | PWR:-44
+[DEBUG] RAW PACKET: Size=158 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [BA:02:79:83:C6:D0] -> '[BROADCAST]' | CH:2 | PWR:-66
+[DEBUG] RAW PACKET: Size=158 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [62:08:42:72:FD:D1] -> '[BROADCAST]' | CH:5 | PWR:-77
+[DEBUG] RAW PACKET: Size=96 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [1E:3D:38:F1:28:7C] -> '[BROADCAST]' | CH:7 | PWR:-51
+[DEBUG] RAW PACKET: Size=106 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [1E:3D:38:F1:28:7C] -> 'free wi fi' | CH:7 | PWR:-45
+[DEBUG] RAW PACKET: Size=100 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [1E:3D:38:F1:28:7C] -> 'free' | CH:7 | PWR:-41
+[DEBUG] RAW PACKET: Size=96 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [1E:3D:38:F1:28:7C] -> '[BROADCAST]' | CH:7 | PWR:-42
+[DEBUG] RAW PACKET: Size=106 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [1E:3D:38:F1:28:7C] -> 'free wi fi' | CH:8 | PWR:-42
+[DEBUG] RAW PACKET: Size=96 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [1E:3D:38:F1:28:7C] -> '[BROADCAST]' | CH:8 | PWR:-40
+[DEBUG] RAW PACKET: Size=106 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [1E:3D:38:F1:28:7C] -> 'free wi fi' | CH:8 | PWR:-39
+[DEBUG] RAW PACKET: Size=100 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [1E:3D:38:F1:28:7C] -> 'free' | CH:8 | PWR:-39
+[DEBUG] RAW PACKET: Size=260 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:10 | PWR:-51
+[DEBUG] RAW PACKET: Size=254 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_RESP] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:10 | PWR:-41
+[DEBUG] RAW PACKET: Size=125 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [D6:83:B1:DA:08:00] -> '[BROADCAST]' | CH:11 | PWR:-41
+[DEBUG] RAW PACKET: Size=254 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_RESP] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:11 | PWR:-47
+[DEBUG] RAW PACKET: Size=40 | Byte0=0x00 | Byte1=0x00 | Byte2=0x1A
+[DEBUG] RAW PACKET: Size=304 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [CE:A4:05:A1:55:23] -> 'Irena' | CH:11 | PWR:-74
+[DEBUG] RAW PACKET: Size=260 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:11 | PWR:-49
+[DEBUG] RAW PACKET: Size=125 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [D6:83:B1:DA:08:00] -> '[BROADCAST]' | CH:11 | PWR:-41
+[DEBUG] RAW PACKET: Size=254 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_RESP] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:11 | PWR:-44
+[DEBUG] RAW PACKET: Size=40 | Byte0=0x00 | Byte1=0x00 | Byte2=0x1A
+[DEBUG] RAW PACKET: Size=260 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:12 | PWR:-49
+[DEBUG] RAW PACKET: Size=158 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [A2:91:01:82:E3:A9] -> '[BROADCAST]' | CH:2 | PWR:-59
+[DEBUG] RAW PACKET: Size=158 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [A2:91:01:82:E3:A9] -> '[BROADCAST]' | CH:3 | PWR:-62
+[DEBUG] RAW PACKET: Size=314 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [EE:CA:09:64:08:C3] -> 'מיכאל's Galaxy S22+' | CH:6 | PWR:-82
+[DEBUG] RAW PACKET: Size=260 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:10 | PWR:-50
+[DEBUG] RAW PACKET: Size=260 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:10 | PWR:-63
+[DEBUG] RAW PACKET: Size=304 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [CE:A4:05:A1:55:23] -> 'Irena' | CH:11 | PWR:-70
+[DEBUG] RAW PACKET: Size=260 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:11 | PWR:-46
+[DEBUG] RAW PACKET: Size=40 | Byte0=0x00 | Byte1=0x00 | Byte2=0x1A
+[DEBUG] RAW PACKET: Size=260 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:12 | PWR:-44
+[DEBUG] RAW PACKET: Size=224 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [0A:A1:EA:1B:01:BA] -> '[BROADCAST]' | CH:1 | PWR:-40
+[DEBUG] RAW PACKET: Size=224 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [0A:A1:EA:1B:01:BA] -> '[BROADCAST]' | CH:1 | PWR:-39
+[DEBUG] RAW PACKET: Size=224 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [0A:A1:EA:1B:01:BA] -> '[BROADCAST]' | CH:1 | PWR:-39
+[DEBUG] RAW PACKET: Size=224 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [0A:A1:EA:1B:01:BA] -> '[BROADCAST]' | CH:1 | PWR:-39
+[DEBUG] RAW PACKET: Size=224 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [0A:A1:EA:1B:01:BA] -> '[BROADCAST]' | CH:2 | PWR:-34
+[DEBUG] RAW PACKET: Size=224 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [0A:A1:EA:1B:01:BA] -> '[BROADCAST]' | CH:2 | PWR:-36
+[DEBUG] RAW PACKET: Size=224 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [0A:A1:EA:1B:01:BA] -> '[BROADCAST]' | CH:2 | PWR:-32
+[DEBUG] RAW PACKET: Size=224 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [0A:A1:EA:1B:01:BA] -> '[BROADCAST]' | CH:2 | PWR:-31
+[DEBUG] RAW PACKET: Size=224 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [0A:A1:EA:1B:01:BA] -> '[BROADCAST]' | CH:3 | PWR:-32
+[DEBUG] RAW PACKET: Size=224 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [0A:A1:EA:1B:01:BA] -> '[BROADCAST]' | CH:3 | PWR:-32
+[DEBUG] RAW PACKET: Size=224 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [0A:A1:EA:1B:01:BA] -> '[BROADCAST]' | CH:3 | PWR:-33
+[DEBUG] RAW PACKET: Size=224 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [0A:A1:EA:1B:01:BA] -> '[BROADCAST]' | CH:3 | PWR:-37
+[DEBUG] RAW PACKET: Size=224 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [0A:A1:EA:1B:01:BA] -> '[BROADCAST]' | CH:4 | PWR:-33
+[DEBUG] RAW PACKET: Size=224 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [0A:A1:EA:1B:01:BA] -> '[BROADCAST]' | CH:4 | PWR:-34
+[DEBUG] RAW PACKET: Size=224 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [0A:A1:EA:1B:01:BA] -> '[BROADCAST]' | CH:4 | PWR:-38
+[DEBUG] RAW PACKET: Size=224 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [0A:A1:EA:1B:01:BA] -> '[BROADCAST]' | CH:5 | PWR:-32
+[DEBUG] RAW PACKET: Size=308 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_RESP] [EE:CA:09:64:08:C3] -> 'מיכאל's Galaxy S22+' | CH:5 | PWR:-80
+[DEBUG] RAW PACKET: Size=40 | Byte0=0x00 | Byte1=0x00 | Byte2=0x1A
+[DEBUG] RAW PACKET: Size=134 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [4A:33:25:67:41:E3] -> 'HOTmobile' | CH:10 | PWR:-39
+[DEBUG] RAW PACKET: Size=125 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [4A:33:25:67:41:E3] -> '[BROADCAST]' | CH:10 | PWR:-45
+[DEBUG] RAW PACKET: Size=40 | Byte0=0x00 | Byte1=0x00 | Byte2=0x1A
+[DEBUG] RAW PACKET: Size=134 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [4A:33:25:67:41:E3] -> 'HOTmobile' | CH:10 | PWR:-39
+[DEBUG] RAW PACKET: Size=125 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [4A:33:25:67:41:E3] -> '[BROADCAST]' | CH:10 | PWR:-37
+[DEBUG] RAW PACKET: Size=134 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [4A:33:25:67:41:E3] -> 'HOTmobile' | CH:10 | PWR:-41
+[DEBUG] RAW PACKET: Size=125 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [4A:33:25:67:41:E3] -> '[BROADCAST]' | CH:10 | PWR:-41
+[DEBUG] RAW PACKET: Size=134 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [4A:33:25:67:41:E3] -> 'HOTmobile' | CH:10 | PWR:-42
+[DEBUG] RAW PACKET: Size=125 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [4A:33:25:67:41:E3] -> '[BROADCAST]' | CH:10 | PWR:-41
+[DEBUG] RAW PACKET: Size=260 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:11 | PWR:-46
+[DEBUG] RAW PACKET: Size=254 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_RESP] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:11 | PWR:-45
+[DEBUG] RAW PACKET: Size=254 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_RESP] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:11 | PWR:-46
+[DEBUG] RAW PACKET: Size=260 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:11 | PWR:-47
+[DEBUG] RAW PACKET: Size=158 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [92:AB:84:C6:30:FD] -> '[BROADCAST]' | CH:12 | PWR:-57
+[DEBUG] RAW PACKET: Size=158 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [92:AB:84:C6:30:FD] -> '[BROADCAST]' | CH:12 | PWR:-58
+[DEBUG] RAW PACKET: Size=260 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:12 | PWR:-50
+[DEBUG] RAW PACKET: Size=134 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [4A:33:25:67:41:E3] -> 'HOTmobile' | CH:13 | PWR:-43
+[DEBUG] RAW PACKET: Size=125 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [4A:33:25:67:41:E3] -> '[BROADCAST]' | CH:13 | PWR:-44
+[DEBUG] RAW PACKET: Size=134 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [4A:33:25:67:41:E3] -> 'HOTmobile' | CH:13 | PWR:-38
+[DEBUG] RAW PACKET: Size=125 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [4A:33:25:67:41:E3] -> '[BROADCAST]' | CH:13 | PWR:-38
+[DEBUG] RAW PACKET: Size=134 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [4A:33:25:67:41:E3] -> 'HOTmobile' | CH:13 | PWR:-37
+[DEBUG] RAW PACKET: Size=125 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [4A:33:25:67:41:E3] -> '[BROADCAST]' | CH:13 | PWR:-36
+[DEBUG] RAW PACKET: Size=134 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [4A:33:25:67:41:E3] -> 'HOTmobile' | CH:13 | PWR:-37
+[DEBUG] RAW PACKET: Size=125 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [4A:33:25:67:41:E3] -> '[BROADCAST]' | CH:13 | PWR:-37
+[DEBUG] RAW PACKET: Size=224 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [52:E5:16:A8:CC:B4] -> '[BROADCAST]' | CH:9 | PWR:-62
+[DEBUG] RAW PACKET: Size=240 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [52:E5:16:A8:CC:B4] -> 'NoisatADSL-29118' | CH:9 | PWR:-79
+[DEBUG] RAW PACKET: Size=229 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [52:E5:16:A8:CC:B4] -> 'moshe' | CH:9 | PWR:-63
+[DEBUG] RAW PACKET: Size=230 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [52:E5:16:A8:CC:B4] -> 'משה' | CH:9 | PWR:-76
+[DEBUG] RAW PACKET: Size=233 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [52:E5:16:A8:CC:B4] -> 'city hall' | CH:10 | PWR:-75
+[DEBUG] RAW PACKET: Size=229 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [52:E5:16:A8:CC:B4] -> 'moshe' | CH:10 | PWR:-76
+[DEBUG] RAW PACKET: Size=224 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [52:E5:16:A8:CC:B4] -> '[BROADCAST]' | CH:10 | PWR:-75
+[DEBUG] RAW PACKET: Size=178 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [C2:A9:58:F5:BB:DF] -> '[BROADCAST]' | CH:10 | PWR:-52
+[DEBUG] RAW PACKET: Size=224 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [52:E5:16:A8:CC:B4] -> '[BROADCAST]' | CH:10 | PWR:-70
+[DEBUG] RAW PACKET: Size=237 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [52:E5:16:A8:CC:B4] -> 'Admiralpalace' | CH:10 | PWR:-57
+[DEBUG] RAW PACKET: Size=230 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [52:E5:16:A8:CC:B4] -> 'משה' | CH:10 | PWR:-69
+[DEBUG] RAW PACKET: Size=260 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:11 | PWR:-46
+[DEBUG] RAW PACKET: Size=236 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [52:E5:16:A8:CC:B4] -> 'Admiralpalas' | CH:11 | PWR:-80
+[DEBUG] RAW PACKET: Size=236 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [52:E5:16:A8:CC:B4] -> 'Admiralpalas' | CH:11 | PWR:-73
+[DEBUG] RAW PACKET: Size=178 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [C2:A9:58:F5:BB:DF] -> '[BROADCAST]' | CH:11 | PWR:-51
+[DEBUG] RAW PACKET: Size=178 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [C2:A9:58:F5:BB:DF] -> '[BROADCAST]' | CH:11 | PWR:-58
+[DEBUG] RAW PACKET: Size=237 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [52:E5:16:A8:CC:B4] -> 'Admiralpalace' | CH:11 | PWR:-72
+[DEBUG] RAW PACKET: Size=236 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [52:E5:16:A8:CC:B4] -> 'Admiralpalas' | CH:11 | PWR:-88
+[DEBUG] RAW PACKET: Size=240 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [52:E5:16:A8:CC:B4] -> 'NoisatADSL-29118' | CH:11 | PWR:-73
+[DEBUG] RAW PACKET: Size=178 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [C2:A9:58:F5:BB:DF] -> '[BROADCAST]' | CH:11 | PWR:-58
+[DEBUG] RAW PACKET: Size=230 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [52:E5:16:A8:CC:B4] -> 'משה' | CH:11 | PWR:-69
+[DEBUG] RAW PACKET: Size=224 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [52:E5:16:A8:CC:B4] -> '[BROADCAST]' | CH:11 | PWR:-72
+[DEBUG] RAW PACKET: Size=40 | Byte0=0x00 | Byte1=0x00 | Byte2=0x1A
+[DEBUG] RAW PACKET: Size=237 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [52:E5:16:A8:CC:B4] -> 'Admiralpalace' | CH:11 | PWR:-75
+[DEBUG] RAW PACKET: Size=260 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:11 | PWR:-45
+[DEBUG] RAW PACKET: Size=236 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [52:E5:16:A8:CC:B4] -> 'Admiralpalas' | CH:11 | PWR:-73
+[DEBUG] RAW PACKET: Size=178 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [C2:A9:58:F5:BB:DF] -> '[BROADCAST]' | CH:12 | PWR:-50
+[DEBUG] RAW PACKET: Size=254 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_RESP] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:12 | PWR:-49
+[DEBUG] RAW PACKET: Size=254 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_RESP] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:12 | PWR:-45
+[DEBUG] RAW PACKET: Size=40 | Byte0=0x00 | Byte1=0x00 | Byte2=0x1A
+[DEBUG] RAW PACKET: Size=178 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [C2:A9:58:F5:BB:DF] -> '[BROADCAST]' | CH:12 | PWR:-53
+[DEBUG] RAW PACKET: Size=254 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_RESP] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:12 | PWR:-46
+[DEBUG] RAW PACKET: Size=40 | Byte0=0x00 | Byte1=0x00 | Byte2=0x1A
+[DEBUG] RAW PACKET: Size=224 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [52:E5:16:A8:CC:B4] -> '[BROADCAST]' | CH:12 | PWR:-76
+[DEBUG] RAW PACKET: Size=237 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [52:E5:16:A8:CC:B4] -> 'Admiralpalace' | CH:12 | PWR:-77
+[DEBUG] RAW PACKET: Size=236 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [52:E5:16:A8:CC:B4] -> 'Admiralpalas' | CH:12 | PWR:-75
+[DEBUG] RAW PACKET: Size=178 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [C2:A9:58:F5:BB:DF] -> '[BROADCAST]' | CH:12 | PWR:-51
+[DEBUG] RAW PACKET: Size=230 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [52:E5:16:A8:CC:B4] -> 'משה' | CH:12 | PWR:-77
+[DEBUG] RAW PACKET: Size=178 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [C2:A9:58:F5:BB:DF] -> '[BROADCAST]' | CH:12 | PWR:-52
+[DEBUG] RAW PACKET: Size=224 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [52:E5:16:A8:CC:B4] -> '[BROADCAST]' | CH:12 | PWR:-72
+[DEBUG] RAW PACKET: Size=178 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [C2:A9:58:F5:BB:DF] -> '[BROADCAST]' | CH:12 | PWR:-52
+[DEBUG] RAW PACKET: Size=233 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [52:E5:16:A8:CC:B4] -> 'city hall' | CH:12 | PWR:-76
+[DEBUG] RAW PACKET: Size=229 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [52:E5:16:A8:CC:B4] -> 'moshe' | CH:12 | PWR:-75
+[DEBUG] RAW PACKET: Size=178 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [C2:A9:58:F5:BB:DF] -> '[BROADCAST]' | CH:12 | PWR:-63
+[DEBUG] RAW PACKET: Size=230 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [52:E5:16:A8:CC:B4] -> 'משה' | CH:13 | PWR:-77
+[DEBUG] RAW PACKET: Size=178 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [C2:A9:58:F5:BB:DF] -> '[BROADCAST]' | CH:13 | PWR:-52
+[DEBUG] RAW PACKET: Size=229 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [52:E5:16:A8:CC:B4] -> 'moshe' | CH:13 | PWR:-77
+[DEBUG] RAW PACKET: Size=224 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [52:E5:16:A8:CC:B4] -> '[BROADCAST]' | CH:13 | PWR:-74
+[DEBUG] RAW PACKET: Size=178 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [C2:A9:58:F5:BB:DF] -> '[BROADCAST]' | CH:13 | PWR:-49
+[DEBUG] RAW PACKET: Size=237 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [52:E5:16:A8:CC:B4] -> 'Admiralpalace' | CH:13 | PWR:-74
+[DEBUG] RAW PACKET: Size=178 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [C2:A9:58:F5:BB:DF] -> '[BROADCAST]' | CH:13 | PWR:-51
+[DEBUG] RAW PACKET: Size=178 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [C2:A9:58:F5:BB:DF] -> '[BROADCAST]' | CH:13 | PWR:-54
+[DEBUG] RAW PACKET: Size=158 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [CE:C9:FE:A6:C4:BE] -> '[BROADCAST]' | CH:2 | PWR:-59
+[DEBUG] RAW PACKET: Size=178 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [F6:74:C7:12:8D:E5] -> '[BROADCAST]' | CH:3 | PWR:-44
+[DEBUG] RAW PACKET: Size=178 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [F6:74:C7:12:8D:E5] -> '[BROADCAST]' | CH:3 | PWR:-51
+[DEBUG] RAW PACKET: Size=178 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [F6:74:C7:12:8D:E5] -> '[BROADCAST]' | CH:4 | PWR:-40
+[DEBUG] RAW PACKET: Size=96 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [76:A7:C1:89:2C:19] -> '[BROADCAST]' | CH:5 | PWR:-51
+[DEBUG] RAW PACKET: Size=96 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [76:A7:C1:89:2C:19] -> '[BROADCAST]' | CH:5 | PWR:-50
+[DEBUG] RAW PACKET: Size=158 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [8A:97:FF:E7:E7:27] -> '[BROADCAST]' | CH:7 | PWR:-61
+[DEBUG] RAW PACKET: Size=46 | Byte0=0x00 | Byte1=0x00 | Byte2=0x1A
+[DEBUG] RAW PACKET: Size=158 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [8A:97:FF:E7:E7:27] -> '[BROADCAST]' | CH:7 | PWR:-64
+[DEBUG] RAW PACKET: Size=158 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [BA:8E:AA:AA:4A:ED] -> '[BROADCAST]' | CH:8 | PWR:-60
+[DEBUG] RAW PACKET: Size=96 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [76:A7:C1:89:2C:19] -> '[BROADCAST]' | CH:9 | PWR:-46
+[DEBUG] RAW PACKET: Size=96 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [76:A7:C1:89:2C:19] -> '[BROADCAST]' | CH:9 | PWR:-46
+[DEBUG] RAW PACKET: Size=96 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [76:A7:C1:89:2C:19] -> '[BROADCAST]' | CH:9 | PWR:-50
+[DEBUG] RAW PACKET: Size=96 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [76:A7:C1:89:2C:19] -> '[BROADCAST]' | CH:9 | PWR:-48
+[DEBUG] RAW PACKET: Size=196 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [96:7B:3F:26:5E:9F] -> '[BROADCAST]' | CH:10 | PWR:-30
+[DEBUG] RAW PACKET: Size=196 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [D6:A8:7C:2D:3D:2C] -> '[BROADCAST]' | CH:11 | PWR:-87
+[DEBUG] RAW PACKET: Size=40 | Byte0=0x00 | Byte1=0x00 | Byte2=0x1A
+[DEBUG] RAW PACKET: Size=196 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [D6:A8:7C:2D:3D:2C] -> '[BROADCAST]' | CH:11 | PWR:-66
+[DEBUG] RAW PACKET: Size=260 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:11 | PWR:-48
+[DEBUG] RAW PACKET: Size=196 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [96:7B:3F:26:5E:9F] -> '[BROADCAST]' | CH:11 | PWR:-38
+[DEBUG] RAW PACKET: Size=196 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [96:7B:3F:26:5E:9F] -> '[BROADCAST]' | CH:11 | PWR:-35
+[DEBUG] RAW PACKET: Size=196 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [96:7B:3F:26:5E:9F] -> '[BROADCAST]' | CH:11 | PWR:-39
+[DEBUG] RAW PACKET: Size=254 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_RESP] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:12 | PWR:-46
+[DEBUG] RAW PACKET: Size=254 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_RESP] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:12 | PWR:-46
+[DEBUG] RAW PACKET: Size=260 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:12 | PWR:-46
+[DEBUG] RAW PACKET: Size=96 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [76:A7:C1:89:2C:19] -> '[BROADCAST]' | CH:12 | PWR:-41
+[DEBUG] RAW PACKET: Size=96 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [76:A7:C1:89:2C:19] -> '[BROADCAST]' | CH:12 | PWR:-43
+[DEBUG] RAW PACKET: Size=196 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [D6:A8:7C:2D:3D:2C] -> '[BROADCAST]' | CH:12 | PWR:-75
+[DEBUG] RAW PACKET: Size=196 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [96:7B:3F:26:5E:9F] -> '[BROADCAST]' | CH:12 | PWR:-39
+[DEBUG] RAW PACKET: Size=96 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [76:A7:C1:89:2C:19] -> '[BROADCAST]' | CH:12 | PWR:-39
+[DEBUG] RAW PACKET: Size=96 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [76:A7:C1:89:2C:19] -> '[BROADCAST]' | CH:12 | PWR:-39
+[DEBUG] RAW PACKET: Size=196 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [96:7B:3F:26:5E:9F] -> '[BROADCAST]' | CH:12 | PWR:-30
+[DEBUG] RAW PACKET: Size=46 | Byte0=0x00 | Byte1=0x00 | Byte2=0x1A
+[DEBUG] RAW PACKET: Size=40 | Byte0=0x00 | Byte1=0x00 | Byte2=0x1A
+[DEBUG] RAW PACKET: Size=58 | Byte0=0x00 | Byte1=0x00 | Byte2=0x1A
+[DEBUG] RAW PACKET: Size=192 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [B6:55:AA:86:44:44] -> '[BROADCAST]' | CH:9 | PWR:-86
+[DEBUG] RAW PACKET: Size=210 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [CE:E7:6B:CB:33:D8] -> '[BROADCAST]' | CH:11 | PWR:-77
+[DEBUG] RAW PACKET: Size=304 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [CE:A4:05:A1:55:23] -> 'Irena' | CH:11 | PWR:-76
+[DEBUG] RAW PACKET: Size=260 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:11 | PWR:-46
+[DEBUG] RAW PACKET: Size=260 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:12 | PWR:-47
+[DEBUG] RAW PACKET: Size=46 | Byte0=0x00 | Byte1=0x00 | Byte2=0x1A
+[DEBUG] RAW PACKET: Size=314 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [EE:CA:09:64:08:C3] -> 'מיכאל's Galaxy S22+' | CH:5 | PWR:-76
+[DEBUG] RAW PACKET: Size=68 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[DEBUG] RAW PACKET: Size=40 | Byte0=0x00 | Byte1=0x00 | Byte2=0x1A
+[DEBUG] RAW PACKET: Size=224 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [82:6B:0C:4B:41:E5] -> '[BROADCAST]' | CH:7 | PWR:-51
+[DEBUG] RAW PACKET: Size=224 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [82:6B:0C:4B:41:E5] -> '[BROADCAST]' | CH:8 | PWR:-52
+[DEBUG] RAW PACKET: Size=210 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [36:D5:94:44:CF:B9] -> '[BROADCAST]' | CH:8 | PWR:-75
+[DEBUG] RAW PACKET: Size=224 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [2E:69:39:41:85:BC] -> '[BROADCAST]' | CH:8 | PWR:-48
+[DEBUG] RAW PACKET: Size=224 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [2E:69:39:41:85:BC] -> '[BROADCAST]' | CH:8 | PWR:-47
+[DEBUG] RAW PACKET: Size=224 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [2E:69:39:41:85:BC] -> '[BROADCAST]' | CH:9 | PWR:-45
+[DEBUG] RAW PACKET: Size=254 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_RESP] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:10 | PWR:-36
+[DEBUG] RAW PACKET: Size=40 | Byte0=0x00 | Byte1=0x00 | Byte2=0x1A
+[DEBUG] RAW PACKET: Size=224 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [2E:69:39:41:85:BC] -> '[BROADCAST]' | CH:10 | PWR:-44
+[DEBUG] RAW PACKET: Size=254 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_RESP] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:10 | PWR:-30
+[DEBUG] RAW PACKET: Size=40 | Byte0=0x00 | Byte1=0x00 | Byte2=0x1A
+[DEBUG] RAW PACKET: Size=298 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_RESP] [CE:A4:05:A1:55:23] -> 'Irena' | CH:10 | PWR:-66
+[DEBUG] RAW PACKET: Size=40 | Byte0=0x00 | Byte1=0x00 | Byte2=0x1A
+[DEBUG] RAW PACKET: Size=158 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [96:D3:77:4A:D1:54] -> '[BROADCAST]' | CH:11 | PWR:-75
+[DEBUG] RAW PACKET: Size=40 | Byte0=0x00 | Byte1=0x00 | Byte2=0x1A
+[DEBUG] RAW PACKET: Size=40 | Byte0=0x00 | Byte1=0x00 | Byte2=0x1A
+[DEBUG] RAW PACKET: Size=58 | Byte0=0x00 | Byte1=0x00 | Byte2=0x1A
+[DEBUG] RAW PACKET: Size=158 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [96:D3:77:4A:D1:54] -> '[BROADCAST]' | CH:11 | PWR:-81
+[DEBUG] RAW PACKET: Size=254 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_RESP] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:11 | PWR:-28
+[DEBUG] RAW PACKET: Size=254 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_RESP] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:11 | PWR:-28
+[DEBUG] RAW PACKET: Size=304 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [CE:A4:05:A1:55:23] -> 'Irena' | CH:11 | PWR:-81
+[DEBUG] RAW PACKET: Size=260 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:11 | PWR:-27
+[DEBUG] RAW PACKET: Size=40 | Byte0=0x00 | Byte1=0x00 | Byte2=0x1A
+[DEBUG] RAW PACKET: Size=177 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [E0:8F:4C:86:3C:56] -> '[BROADCAST]' | CH:12 | PWR:-40
+[DEBUG] RAW PACKET: Size=260 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:12 | PWR:-38
+[DEBUG] RAW PACKET: Size=125 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [EA:0D:E9:FB:CC:47] -> '[BROADCAST]' | CH:1 | PWR:-48
+[DEBUG] RAW PACKET: Size=158 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [3A:7E:DE:0A:DD:89] -> '[BROADCAST]' | CH:7 | PWR:-64
+[DEBUG] RAW PACKET: Size=158 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[PROBE_REQ] [76:58:74:BC:FC:B7] -> '[BROADCAST]' | CH:8 | PWR:-60
+[DEBUG] RAW PACKET: Size=260 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:10 | PWR:-39
+[DEBUG] RAW PACKET: Size=260 | Byte0=0x00 | Byte1=0x00 | Byte2=0x26
+[BEACON] [BE:AA:2B:09:6C:98] -> 'Redmi 12' | CH:11 | PWR:-33
