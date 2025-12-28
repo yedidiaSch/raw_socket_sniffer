@@ -5,58 +5,54 @@ from datetime import datetime
 
 class PacketListener:
     """
-    Handles UDP socket listening and statistical aggregation 
-    for the network sniffer.
+    Listens for UDP connection from C Sniffer and processes data.
     """
-    def __init__(self, ip="127.0.0.1", port=5005, history_size=20):
-        # Initialize UDP socket
+    def __init__(self, ip="127.0.0.1", port=5005, history_size=25):
+        # Create socket
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind((ip, port))
-        # Set to non-blocking mode to prevent UI freezes
-        self.sock.setblocking(False)
+        self.sock.setblocking(False) # Prevent interface blocking
         
-        # Data Structures
-        self.history = deque(maxlen=history_size) # Rolling buffer for the packet table
-        self.ip_counter = Counter()               # Stats for Source IPs
-        self.protocol_counter = Counter()         # Stats for Protocols (TCP/UDP/etc.)
+        # Data structures
+        self.history = deque(maxlen=history_size) # Keep only last 25
+        self.ip_counter = Counter()               # Count addresses (IP or MAC)
+        self.protocol_counter = Counter()         # Count protocols
         self.total_bytes = 0
 
     def fetch_packets(self):
-        """
-        Reads all available packets currently in the socket buffer.
-        This enables batch processing for better performance.
-        """
+        """Reads all packets accumulated in buffer"""
         while True:
             try:
-                # Receive data (buffer size 4096 to accommodate JSON)
                 data, _ = self.sock.recvfrom(4096)
-                
-                # Parse JSON
                 packet = json.loads(data.decode('utf-8'))
                 
-                # Add local timestamp for display
+                # Add local time for display
                 packet['timestamp'] = datetime.now().strftime("%H:%M:%S")
                 
                 self._update_stats(packet)
                 
             except BlockingIOError:
-                # No more data in the buffer, exit loop
-                break 
+                break # No more data at the moment
             except Exception:
-                # Ignore malformed packets or JSON errors
-                continue
+                continue # Ignore broken packets
 
     def _update_stats(self, packet):
-        """Internal method to update counters and history."""
         self.history.append(packet)
-        self.total_bytes += packet['size']
-        self.protocol_counter[packet['type']] += 1
+        self.total_bytes += packet.get('size', 0)
         
-        # Count source IPs (ignore N/A or local noise if needed)
-        if packet['src_ip'] != "N/A":
-            self.ip_counter[packet['src_ip']] += 1
+        # Identify protocol type for statistics
+        # If WiFi, use subtype (e.g. BEACON), otherwise type (e.g. TCP)
+        p_type = packet.get('subtype') if packet.get('type') == '802.11' else packet.get('type')
+        if not p_type: p_type = "Unknown"
+        self.protocol_counter[p_type] += 1
+        
+        # Count source (MAC for WiFi, IP for Ethernet)
+        src = packet.get('src_mac') if packet.get('type') == '802.11' else packet.get('src_ip')
+        
+        if src and src != "N/A":
+            self.ip_counter[src] += 1
 
-    # --- Getters for the UI ---
+    # --- Getters ---
     def get_history(self):
         return self.history
 

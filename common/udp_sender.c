@@ -1,6 +1,6 @@
 /**
  * @file udp_sender.c
- * @brief Implementation of UDP sender.
+ * @brief Implementation of UDP sender with WiFi Subtype support.
  */
 
 #define _GNU_SOURCE
@@ -40,9 +40,27 @@ void send_udp_metadata(const PacketMetadata* meta)
         return;
     }
 
-    // Determine Protocol String
+    // 1. Determine main protocol
     const char* proto_str = "Other";
-    if (meta->ether_type == 0x0806) {
+    char subtype_str[20] = ""; 
+
+    if (meta->is_monitor_mode) {
+        proto_str = "802.11";
+        
+        // Determine Subtype based on SSID (simple heuristic based on parser output)
+        if (strcmp(meta->ssid, "[BROADCAST]") == 0) {
+            strcpy(subtype_str, "PROBE_REQ");
+        } else if (strcmp(meta->ssid, "[Encrypted Data]") == 0) {
+            strcpy(subtype_str, "DATA");
+        } else if (strncmp(meta->ssid, "PROBE", 5) == 0) {
+             // Case where SSID is not BROADCAST but it is still PROBE (rare, but for safety)
+             strcpy(subtype_str, "PROBE_REQ");
+        } else {
+            // Default: Beacon
+            strcpy(subtype_str, "BEACON");
+        }
+
+    } else if (meta->ether_type == 0x0806) {
         proto_str = "ARP";
     } else if (meta->ether_type == 0x0800) { // IPv4
         if (meta->l3_protocol == 6) proto_str = "TCP";
@@ -56,31 +74,42 @@ void send_udp_metadata(const PacketMetadata* meta)
         else proto_str = "IPv6";
     }
 
-    // Format as JSON
+    // 2. Construct JSON
     char json_buffer[4096];
     snprintf(json_buffer, sizeof(json_buffer), 
         "{"
-        "\"src_mac\": \"%02x:%02x:%02x:%02x:%02x:%02x\","
-        "\"dest_mac\": \"%02x:%02x:%02x:%02x:%02x:%02x\","
+        "\"src_mac\": \"%02X:%02X:%02X:%02X:%02X:%02X\","
+        "\"dest_mac\": \"%02X:%02X:%02X:%02X:%02X:%02X\","
         "\"src_ip\": \"%s\","
         "\"dest_ip\": \"%s\","
         "\"type\": \"%s\","
+        "\"subtype\": \"%s\","
         "\"src_port\": %d,"
         "\"dest_port\": %d,"
         "\"tcp_flags\": %d,"
-        "\"size\": %d"
+        "\"size\": %d,"
+        "\"is_monitor\": %d,"
+        "\"signal_dbm\": %d,"
+        "\"channel\": %d,"
+        "\"ssid\": \"%s\""
         "}",
         meta->src_mac[0], meta->src_mac[1], meta->src_mac[2], meta->src_mac[3], meta->src_mac[4], meta->src_mac[5],
         meta->dest_mac[0], meta->dest_mac[1], meta->dest_mac[2], meta->dest_mac[3], meta->dest_mac[4], meta->dest_mac[5],
         meta->src_ip,
         meta->dest_ip,
         proto_str,
+        subtype_str, 
         meta->src_port,
         meta->dest_port,
         meta->tcp_flags,
-        meta->packet_size
+        meta->packet_size,
+        meta->is_monitor_mode,
+        meta->signal_dbm,
+        meta->channel,
+        meta->ssid
     );
 
+    // 3. Send
     sendto(sockfd, json_buffer, strlen(json_buffer), 0, 
            (const struct sockaddr *)&server_addr, sizeof(server_addr));
 }

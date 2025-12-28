@@ -30,18 +30,12 @@ volatile int keep_running = 1;
  */
 void handle_signal(int signal);
 
-/**
- * @brief Main entry point of the application.
- * 
- * Initializes the sniffer, creates a raw socket, and continuously
- * captures and processes packets until a termination signal is received.
- * 
- * @param argc Argument count.
- * @param argv Argument vector.
- * @return int Exit status code (0 for success, 1 for failure).
- */
+
+
 int main(int argc, char** argv)
 {
+    setbuf(stdout, NULL); // Disable stdout buffering for real-time logs
+    
     if (argc != 2) {
         printf("Usage: %s <interface>\n", argv[0]);
         return 1;
@@ -88,11 +82,8 @@ int main(int argc, char** argv)
         else {
             // Packet received successfully
             process_packet(buffer, data_size);
-        }
 
-        // B. Process packet (Placeholder for next step)
-        // Here we will call: process_packet(buffer, data_size);
-        log_message("Received packet of size: %d bytes\n", data_size);
+        }
     }
 
     // Cleanup

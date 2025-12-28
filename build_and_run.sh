@@ -1,49 +1,115 @@
 #!/bin/bash
 
-# Build and Run Script for Sniffer Project
+# Build and Run Script for Sniffer Project (Airmon-ng Version)
 
 # Default interface
-INTERFACE=${1:-wlp2s0}
+BASE_INTERFACE=${1:-wlp2s0}
+SNIFFER_PID=""
 
+# --- Step 1: Ask User for Mode ---
 echo "========================================"
+echo "Select Operation Mode:"
+echo "1) Managed Mode (Normal)"
+echo "   - Uses $BASE_INTERFACE"
+echo "   - Keeps internet connection."
+echo "2) Monitor Mode (Hacker Mode)"
+echo "   - Uses airmon-ng to enable Monitor Mode"
+echo "   - Kills WiFi connection."
+echo "========================================"
+read -p "Enter choice [1 or 2]: " MODE_CHOICE
+
+# --- Step 2: Build ---
 echo "Building Sniffer..."
-echo "========================================"
+mkdir -p build && cd build && cmake .. && make
+if [ $? -ne 0 ]; then echo "Build failed."; exit 1; fi
+cd ..
+sudo -v # Refresh sudo
 
-# Create build directory if it doesn't exist
-mkdir -p build
-cd build
+# --- Step 3: Execution Logic ---
 
-# Configure with CMake
-cmake ..
+if [ "$MODE_CHOICE" == "2" ]; then
+    # ==========================================
+    # OPTION 2: MONITOR MODE (via Airmon-ng)
+    # ==========================================
+    echo "[*] Setting up Monitor Mode with airmon-ng..."
 
-# Build the project
-make
+    # 1. Kill interfering processes
+    sudo airmon-ng check kill > /dev/null 2>&1
 
-# Check if build was successful
-if [ $? -eq 0 ]; then
-    echo "========================================"
-    echo "Build Successful!"
-    echo "Running Sniffer and Dashboard on interface: $INTERFACE"
-    echo "========================================"
+    # 2. Start Monitor Mode
+    echo "[*] Activating monitor on $BASE_INTERFACE..."
+    sudo airmon-ng start $BASE_INTERFACE > /dev/null 2>&1
+
+    # 3. Detect the NEW interface name (e.g., wlan0mon)
+    # We look for an interface that is NOT the base one, or just assume the standard naming
+    # Reliable method: Parse iw dev output
+    MON_INTERFACE=$(iw dev | grep Interface | awk '{print $2}' | grep "mon" | head -n 1)
     
-    # Go back to project root
-    cd ..
+    # Fallback if detection failed, try adding 'mon' to base
+    if [ -z "$MON_INTERFACE" ]; then
+        MON_INTERFACE="${BASE_INTERFACE}mon"
+    fi
 
-    # Refresh sudo credentials to avoid password prompt in background
-    sudo -v
+    echo "[V] Monitor Interface Detected: $MON_INTERFACE"
 
-    # Start Sniffer in background, silencing output
-    echo "Starting Sniffer (Background)..."
-    sudo ./build/Sniffer $INTERFACE > /dev/null 2>&1 &
-    SNIFFER_PID=$!
+    # Define Cleanup Function
+    function cleanup {
+        echo ""
+        echo "[!] Stopping Monitor Mode..."
+        if [ ! -z "$SNIFFER_PID" ]; then sudo kill $SNIFFER_PID 2>/dev/null; fi
+        if [ ! -z "$HOPPER_PID" ]; then sudo kill $HOPPER_PID 2>/dev/null; fi
 
-    # Ensure Sniffer is killed when script exits
-    trap "sudo kill $SNIFFER_PID" EXIT
+        # Stop airmon-ng interface
+        sudo airmon-ng stop $MON_INTERFACE > /dev/null 2>&1
+        
+        # Restart Network Manager
+        echo "[*] Restarting Network Services..."
+        sudo systemctl start NetworkManager
+        sudo systemctl start wpa_supplicant 2>/dev/null
+        
+        if [ -f sniffer.log ]; then sudo chown $USER:$USER sniffer.log; fi
+        echo "[V] Internet restored."
+    }
+    trap cleanup EXIT
 
-    # Run the Python Dashboard (Foreground)
-    echo "Starting Dashboard..."
-    python3 python/app.py
+    # Start Channel Hopper on the MON interface
+    echo "[*] Starting Channel Hopper on $MON_INTERFACE..."
+    (
+        while true; do
+            for channel in {1..13}; do
+                sudo iw dev $MON_INTERFACE set channel $channel 2>/dev/null
+                sleep 0.5
+            done
+        done
+    ) &
+    HOPPER_PID=$!
+
+    # Set interface variable for the sniffer
+    CURRENT_INTERFACE=$MON_INTERFACE
+
 else
-    echo "Build failed. Aborting."
-    exit 1
+    # ==========================================
+    # OPTION 1: MANAGED MODE
+    # ==========================================
+    echo "[*] Using Managed Mode on $BASE_INTERFACE..."
+    CURRENT_INTERFACE=$BASE_INTERFACE
+    
+    function cleanup {
+        echo "[!] Shutting down..."
+        if [ ! -z "$SNIFFER_PID" ]; then sudo kill $SNIFFER_PID 2>/dev/null; fi
+        if [ -f sniffer.log ]; then sudo chown $USER:$USER sniffer.log; fi
+    }
+    trap cleanup EXIT
 fi
+
+# --- Step 4: Run Application ---
+
+echo "Starting Sniffer on $CURRENT_INTERFACE..."
+echo "Logs -> sniffer.log"
+
+# Run Sniffer with Output Redirection
+sudo ./build/Sniffer $CURRENT_INTERFACE > sniffer.log 2>&1 &
+SNIFFER_PID=$!
+
+echo "Starting Dashboard..."
+python3 python/app.py

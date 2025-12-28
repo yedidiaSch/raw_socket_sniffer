@@ -1,6 +1,6 @@
 /**
  * @file logger.c
- * @brief Implementation of thread-safe logging functions.
+ * @brief Thread-safe logging implementation.
  */
 
 #define _GNU_SOURCE
@@ -19,8 +19,8 @@ typedef enum {
 
 typedef struct LogNode {
     LogType type;
-    char* message;          // For text logs
-    PacketMetadata packet;  // For packet logs
+    char* message;          // For standard text messages
+    PacketMetadata packet;  // For network packet metadata
     struct LogNode* next;
 } LogNode;
 
@@ -34,7 +34,7 @@ static pthread_t logger_thread;
 static volatile int logger_running = 0;
 
 /**
- * @brief The main loop for the logger thread.
+ * @brief Main loop of the Logger Thread.
  */
 static void* logger_worker(void* arg) {
     (void)arg;
@@ -46,13 +46,13 @@ static void* logger_worker(void* arg) {
             pthread_cond_wait(&queue_cond, &queue_mutex);
         }
 
-        // If shutdown and empty, exit
+        // Exit if shutdown requested and queue is empty
         if (!logger_running && head == NULL) {
             pthread_mutex_unlock(&queue_mutex);
             break;
         }
 
-        // Pop message
+        // Dequeue an item
         LogNode* node = head;
         head = node->next;
         if (head == NULL) {
@@ -61,12 +61,13 @@ static void* logger_worker(void* arg) {
 
         pthread_mutex_unlock(&queue_mutex);
 
-        // Process message (IO operation outside lock)
+        // Process the message (outside the lock)
         if (node) {
             if (node->type == LOG_TYPE_TEXT) {
                 printf("%s", node->message); 
                 free(node->message);
             } else if (node->type == LOG_TYPE_PACKET) {
+                // Call function from udp_sender.c
                 send_udp_metadata(&node->packet);
             }
             free(node);
@@ -78,7 +79,7 @@ static void* logger_worker(void* arg) {
 void init_logger() {
     if (logger_running) return;
     
-    // Initialize UDP Sender (Hardcoded for now as per request context, or could be args)
+    // Initialize UDP sender
     init_udp_sender("127.0.0.1", 5005);
 
     logger_running = 1;
@@ -103,7 +104,7 @@ void log_message(const char* fmt, ...) {
 
     va_list args;
     
-    // Determine required size
+    // Calculate message size
     va_start(args, fmt);
     int size = vsnprintf(NULL, 0, fmt, args);
     va_end(args);
@@ -117,7 +118,7 @@ void log_message(const char* fmt, ...) {
     vsnprintf(buffer, size + 1, fmt, args);
     va_end(args);
 
-    // Create node
+    // Create new node
     LogNode* node = (LogNode*)malloc(sizeof(LogNode));
     if (!node) {
         free(buffer);
@@ -127,7 +128,7 @@ void log_message(const char* fmt, ...) {
     node->message = buffer;
     node->next = NULL;
 
-    // Push to queue
+    // Add to queue
     pthread_mutex_lock(&queue_mutex);
     if (tail) {
         tail->next = node;
@@ -146,11 +147,11 @@ void log_packet(const PacketMetadata* meta) {
     if (!node) return;
 
     node->type = LOG_TYPE_PACKET;
-    node->packet = *meta; // Copy struct
+    node->packet = *meta; // Copy data
     node->message = NULL;
     node->next = NULL;
 
-    // Push to queue
+    // Add to queue
     pthread_mutex_lock(&queue_mutex);
     if (tail) {
         tail->next = node;

@@ -40,6 +40,12 @@ typedef struct {
     
     // Metadata
     int packet_size;
+
+    // Monitor Mode / 802.11
+    int is_monitor_mode;      // 1 if Radiotap/802.11, 0 otherwise
+    int8_t signal_dbm;        // Signal strength in dBm
+    int channel;              // Frequency/Channel
+    char ssid[33];            // SSID (if available, e.g., Beacon frames)
 } PacketMetadata;
 
 #endif // TYPES_H
