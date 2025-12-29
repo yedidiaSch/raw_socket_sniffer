@@ -1,4 +1,4 @@
-Network Packet Sniffer & WiFi Diagnostic Tool
+### Network Packet Sniffer & WiFi Diagnostic Tool
 
 ![Platform](https://img.shields.io/badge/platform-Linux-green.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
