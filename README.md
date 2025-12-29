@@ -55,12 +55,12 @@ Use the provided automation script to handle build, interface configuration, and
 
 1.  **Make the script executable:**
     ```bash
-    chmod +x run.sh
+    chmod +x build_and_run.sh
     ```
 
 2.  **Run the Tool:**
     ```bash
-    ./run.sh
+    ./build_and_run.sh
     ```
 
 ### Operation Modes:
@@ -92,7 +92,7 @@ Sniffer/
 │   ├── data_listener.py # UDP receiver & aggregator
 │   └── ui_renderer.py   # UI rendering logic
 ├── build/            # Compilation artifacts
-├── run.sh            # Automation script
+├── build_and_run.sh            # Automation script
 └── CMakeLists.txt    # Build configuration
 ```
 
