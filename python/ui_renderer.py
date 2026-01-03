@@ -74,7 +74,7 @@ def render_packet_table(packet_history):
             elif subtype == "DATA": 
                 type_display = "DATA"
                 style = "dim white"
-            elif ssid == "[HANDSHAKE]":
+            elif subtype == "EAPOL":
                 type_display = "EAPOL"     # השם המקצועי
                 style = "bold red blink"   # אדום מהבהב!
                 info = "🔑 KEY EXCHANGE!"

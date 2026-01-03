@@ -1,20 +1,22 @@
 /**
  * @file packetParser.h
- * @brief Core packet parsing orchestration.
+ * @brief Main entry point for packet processing.
+ *
+ * This module acts as a dispatcher. It analyzes the raw packet buffer
+ * to determine the mode of operation (Monitor Mode vs Managed Mode)
+ * and delegates processing to the appropriate module.
  */
 
-#ifndef PACKET_PARSER_H
-#define PACKET_PARSER_H
+#ifndef PACKETPARSER_H
+#define PACKETPARSER_H
 
 /**
- * @brief Main entry point for parsing a raw packet.
- * 
- * This function orchestrates the parsing process by starting at Layer 2 (Ethernet)
- * and delegating to higher layers (Network, Transport) based on the packet content.
- * 
- * @param buffer Pointer to the raw packet data.
- * @param size Total size of the captured packet in bytes.
+ * @brief Analyzes a raw packet and dispatches it to the correct handler.
+ * * * If the packet starts with Radiotap data (Monitor Mode), it calls the Monitor Mode handler.
+ * * Otherwise, it assumes Ethernet framing (Managed Mode) and calls the Managed Mode handler.
+ * * @param buffer Pointer to the start of the packet data (Zero-Copy safe).
+ * @param size Total size of the received packet in bytes.
  */
 void process_packet(const unsigned char* buffer, int size);
 
-#endif // PACKET_PARSER_H
+#endif // PACKETPARSER_H

@@ -74,8 +74,8 @@ if [ "$MODE_CHOICE" == "2" ]; then
     trap cleanup EXIT
 
     # --- FIXED CHANNEL CONFIGURATION (FOR HANDSHAKE CAPTURE) ---
-    #echo "[*] Locking interface to Channel 12..."
-    #sudo iw dev $MON_INTERFACE set channel 12
+    #echo "[*] Locking interface to Channel 11..."
+    #sudo iw dev $MON_INTERFACE set channel 11
 
     # --- OLD CHANNEL HOPPER (COMMENTED OUT) ---
     echo "[*] Starting Channel Hopper on $MON_INTERFACE..."

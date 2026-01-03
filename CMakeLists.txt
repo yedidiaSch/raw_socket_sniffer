@@ -23,10 +23,11 @@ set(SOURCES
     main.c
     socket/rawSocket.c
     core/packetParser.c
+    core/managedMode.c
+    core/monitorMode.c
     layers/ethernetLayer.c
     layers/networkLayer.c
     layers/transportLayer.c
-    common/utils.c
     common/logger.c
     common/udp_sender.c
 )
@@ -36,10 +37,11 @@ set(HEADERS
     common/Types.h
     socket/rawSocket.h
     core/packetParser.h
+    core/managedMode.h
+    core/monitorMode.h
     layers/ethernetLayer.h
     layers/networkLayer.h
     layers/transportLayer.h
-    common/utils.h
     common/logger.h
     common/udp_sender.h
 )

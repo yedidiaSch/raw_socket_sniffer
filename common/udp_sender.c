@@ -52,6 +52,8 @@ void send_udp_metadata(const PacketMetadata* meta)
             strcpy(subtype_str, "PROBE_REQ");
         } else if (strcmp(meta->ssid, "[Encrypted Data]") == 0) {
             strcpy(subtype_str, "DATA");
+        } else if (strcmp(meta->ssid, "[HANDSHAKE]") == 0) {
+            strcpy(subtype_str, "EAPOL");
         } else if (strncmp(meta->ssid, "PROBE", 5) == 0) {
              // Case where SSID is not BROADCAST but it is still PROBE (rare, but for safety)
              strcpy(subtype_str, "PROBE_REQ");

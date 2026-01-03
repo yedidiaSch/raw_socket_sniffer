@@ -8,7 +8,6 @@
 #include <net/ethernet.h>
 #include <arpa/inet.h>
 #include "ethernetLayer.h"
-#include "utils.h"
 #include "logger.h"
 
 /**
