@@ -1,4 +1,4 @@
-# Network Packet Sniffer & WiFi Diagnostic Tool
+### Network Packet Sniffer & WiFi Diagnostic Tool
 
 ![Platform](https://img.shields.io/badge/platform-Linux-green.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
@@ -7,25 +7,25 @@ A high-performance, raw socket-based network analyzer written in C for Linux, pa
 
 This tool provides deep visibility into network traffic, featuring advanced parsing capabilities for both standard Ethernet/IP traffic and raw 802.11 WiFi frames, including support for variable-length Radiotap headers found in modern drivers.
 
-## 🚀 Key Features
+##  Key Features
 
-### 📡 Wireless Analysis (Monitor Mode)
+###  Wireless Analysis (Monitor Mode)
 - **Dynamic Radiotap Parsing:** Robust handling of variable-length Radiotap headers (26/38/50 bytes), ensuring compatibility across various WiFi chipsets.
 - **Management Frame Analysis:**
   - Real-time visualization of Beacons and SSIDs.
   - **Probe Request Logging:** Analysis of active scanning behavior by nearby devices.
-- **🔐 Protocol Inspection:** Detection and logging of **EAPOL frames** and authentication sequences (Key Exchanges) for security auditing and troubleshooting.
+- ** Protocol Inspection:** Detection and logging of **EAPOL frames** and authentication sequences (Key Exchanges) for security auditing and troubleshooting.
 - **Signal Telemetry:** Live RSSI (Signal Strength) monitoring per device.
 
-### 🔌 Traffic Analysis (Managed Mode)
+###  Traffic Analysis (Managed Mode)
 - **Full Stack Parsing:** Ethernet II, IP (v4/v6), TCP, and UDP.
 - **Network Stats:** Real-time tracking of top talkers, bandwidth usage, and protocol distribution.
 
-### 🖥️ Dashboard
+###  Dashboard
 - **Rich TUI:** A lightweight, non-blocking terminal interface utilizing the `rich` library.
 - **Live Stream:** Color-coded packet log for instant protocol identification (Green=Mgmt, Yellow=Control, Red=Auth, Blue=Data).
 
-## 🛠️ Prerequisites
+##  Prerequisites
 
 - **Operating System**: Linux (Kernel with `AF_PACKET` support).
 - **Hardware**: WiFi Adapter supporting Monitor Mode (required for 802.11 analysis).
@@ -49,18 +49,18 @@ This tool provides deep visibility into network traffic, featuring advanced pars
     pip install rich
     ```
 
-## 🚀 Usage
+##  Usage
 
 Use the provided automation script to handle build, interface configuration, and execution.
 
 1.  **Make the script executable:**
     ```bash
-    chmod +x run.sh
+    chmod +x build_and_run.sh
     ```
 
 2.  **Run the Tool:**
     ```bash
-    ./run.sh
+    ./build_and_run.sh
     ```
 
 ### Operation Modes:
@@ -76,7 +76,7 @@ Use the provided automation script to handle build, interface configuration, and
     * **Note:** This mode disconnects the active WiFi session.
     * *Channel Locking:* To analyze specific exchanges (e.g., EAPOL), manual channel locking via `iw` is recommended over the default hopping behavior.
 
-## 📂 Project Structure
+##  Project Structure
 
 ```text
 Sniffer/
@@ -92,7 +92,7 @@ Sniffer/
 │   ├── data_listener.py # UDP receiver & aggregator
 │   └── ui_renderer.py   # UI rendering logic
 ├── build/            # Compilation artifacts
-├── run.sh            # Automation script
+├── build_and_run.sh            # Automation script
 └── CMakeLists.txt    # Build configuration
 ```
 
