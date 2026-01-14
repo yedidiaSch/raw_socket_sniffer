@@ -11,6 +11,13 @@ def get_service_name(port):
     except:
         return str(port)
 
+def format_address(ip, port):
+    if not ip: return "N/A"
+    service = get_service_name(port)
+    if service != str(port):
+        return f"{ip}:{port} ({service})"
+    return f"{ip}:{port}"
+
 def create_layout():
     """
     Defines screen structure: Header, Main area (Table + Stats), and Footer.
@@ -39,11 +46,11 @@ def render_packet_table(packet_history):
     
     # Define columns
     table.add_column("Time", style="dim", width=8)
-    table.add_column("Type", justify="center", width=8)
+    table.add_column("Proto", justify="center", width=8)
     table.add_column("Source", style="cyan")
     table.add_column("Destination", style="magenta")
-    table.add_column("Info / SSID", style="green")
-    table.add_column("Signal", justify="right", width=8)
+    table.add_column("Info", style="green")
+    table.add_column("Signal/Type", justify="right", width=12)
 
     for pkt in packet_history:
         # Extract basic data
@@ -99,15 +106,76 @@ def render_packet_table(packet_history):
             else:
                 signal = "-"
 
-        # --- Standard Ethernet Logic (TCP/UDP) ---
+        # --- Standard Ethernet Logic (TCP/UDP/ARP/ICMP) ---
         else:
-            if pkt_type == "TCP": style = "bold blue"
-            elif pkt_type == "UDP": style = "bold orange3"
-            
-            source = f"{pkt.get('src_ip')}:{pkt.get('src_port')}"
-            dest = f"{pkt.get('dest_ip')}:{pkt.get('dest_port')}"
-            info = f"Size: {pkt.get('size')} bytes"
-            signal = "Wired"
+            src_ip = pkt.get('src_ip', '')
+            dest_ip = pkt.get('dest_ip', '')
+            src_port = pkt.get('src_port', 0)
+            dest_port = pkt.get('dest_port', 0)
+            size = pkt.get('size', 0)
+
+            if pkt_type == "TCP": 
+                style = "bold blue"
+                source = format_address(src_ip, src_port)
+                dest = format_address(dest_ip, dest_port)
+                flags = pkt.get('tcp_flags', 0)
+                flag_str = []
+                if flags & 0x02: flag_str.append("SYN")
+                if flags & 0x10: flag_str.append("ACK")
+                if flags & 0x01: flag_str.append("FIN")
+                if flags & 0x04: flag_str.append("RST")
+                if flags & 0x08: flag_str.append("PSH")
+                info = f"Flags: {' '.join(flag_str)} | Len: {size}"
+                signal = "Wired (TCP)"
+
+            elif pkt_type == "UDP": 
+                style = "bold orange3"
+                source = format_address(src_ip, src_port)
+                dest = format_address(dest_ip, dest_port)
+                
+                # Heuristic for common UDP services
+                if src_port == 53 or dest_port == 53:
+                    info = "DNS Query/Response"
+                elif src_port == 67 or dest_port == 67 or src_port == 68 or dest_port == 68:
+                    info = "DHCP"
+                elif src_port == 443 or dest_port == 443:
+                    info = "QUIC (UDP Web)"
+                else:
+                    info = f"UDP Data | Len: {size}"
+                signal = "Wired (UDP)"
+
+            elif pkt_type == "ARP":
+                style = "bold magenta"
+                source = pkt.get('src_mac', '')
+                dest = pkt.get('dest_mac', '')
+                info = "ARP Request/Reply"
+                signal = "Wired (ARP)"
+
+            elif pkt_type == "ICMP":
+                style = "bold cyan"
+                source = src_ip
+                dest = dest_ip
+                info = f"ICMP Packet | Len: {size}"
+                signal = "Wired (ICMP)"
+
+            elif pkt_type == "ICMPv6":
+                style = "cyan"
+                source = src_ip
+                dest = dest_ip
+                info = f"ICMPv6 Packet | Len: {size}"
+                signal = "Wired (IPv6)"
+
+            else:
+                # Other/Unknown protocols
+                style = "dim white"
+                if src_ip:
+                    source = f"{src_ip}"
+                    dest = f"{dest_ip}"
+                else:
+                    source = pkt.get('src_mac', '')
+                    dest = pkt.get('dest_mac', '')
+                info = f"Raw Protocol: {pkt_type} | Len: {size}"
+                signal = "Wired (Raw)"
 
         # Add row to table
         table.add_row(

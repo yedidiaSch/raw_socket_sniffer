@@ -10,6 +10,13 @@
 #include "logger.h"
 #include "Types.h"
 
+// Flag set by main.c based on interface type
+static int g_is_monitor_mode = 0;
+
+void set_monitor_mode(int enabled) {
+    g_is_monitor_mode = enabled;
+}
+
 void process_packet(const unsigned char* buffer, int size) {
     PacketMetadata meta;
     memset(&meta, 0, sizeof(PacketMetadata));
@@ -17,17 +24,12 @@ void process_packet(const unsigned char* buffer, int size) {
 
     // --- Dispatch Logic ---
     
-    /**
-     * Heuristic Detection for Monitor Mode (Radiotap Headers):
-     * Radiotap headers typically start with version 0x00 at byte 0.
-     * We also check for a minimum size to avoid false positives.
-     */
-    if (size > 4 && buffer[0] == 0x00) {
-        // Delegate to the WiFi Monitor Mode specialist
+    if (g_is_monitor_mode) {
+        // Monitor Mode: Expect Radiotap + 802.11 frames
         parse_monitor_packet(buffer, size, &meta);
     } 
     else {
-        // Delegate to the Standard Ethernet/IP specialist
+        // Managed Mode: Standard Ethernet/IP packets
         parse_managed_packet(buffer, size, &meta);
     }
 

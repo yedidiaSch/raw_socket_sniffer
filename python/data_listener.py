@@ -33,8 +33,13 @@ class PacketListener:
                 
             except BlockingIOError:
                 break # No more data at the moment
-            except Exception:
-                continue # Ignore broken packets
+            except json.JSONDecodeError as e:
+                print(f"[ERROR] JSON decode failed: {e}")
+                print(f"[ERROR] Raw data: {data[:200]}")
+                continue
+            except Exception as e:
+                print(f"[ERROR] Unexpected error: {e}")
+                continue
 
     def _update_stats(self, packet):
         self.history.append(packet)

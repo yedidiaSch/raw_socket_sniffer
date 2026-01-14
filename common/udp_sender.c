@@ -68,6 +68,7 @@ void send_udp_metadata(const PacketMetadata* meta)
         if (meta->l3_protocol == 6) proto_str = "TCP";
         else if (meta->l3_protocol == 17) proto_str = "UDP";
         else if (meta->l3_protocol == 1) proto_str = "ICMP";
+        else if (meta->l3_protocol == 2) proto_str = "IGMP";
         else proto_str = "IPv4";
     } else if (meta->ether_type == 0x86DD) { // IPv6
         if (meta->l3_protocol == 6) proto_str = "TCP";

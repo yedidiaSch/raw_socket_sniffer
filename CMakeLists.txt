@@ -25,6 +25,7 @@ set(SOURCES
     core/packetParser.c
     core/managedMode.c
     core/monitorMode.c
+    core/mmapSniffer.c
     layers/ethernetLayer.c
     layers/networkLayer.c
     layers/transportLayer.c
@@ -38,6 +39,7 @@ set(HEADERS
     socket/rawSocket.h
     core/packetParser.h
     core/managedMode.h
+    core/mmapSniffer.h
     core/monitorMode.h
     layers/ethernetLayer.h
     layers/networkLayer.h

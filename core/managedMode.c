@@ -4,9 +4,10 @@
  */
 
 #include "managedMode.h"
-#include "ethernetLayer.h" // Assumed existing file
-#include "networkLayer.h"  // Assumed existing file
-#include "transportLayer.h" // Assumed existing file
+#include "ethernetLayer.h"
+#include "networkLayer.h"  
+#include "transportLayer.h" 
+#include "logger.h" // Added for logging
 #include <netinet/in.h>
 #include <net/ethernet.h>
 
