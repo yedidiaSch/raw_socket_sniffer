@@ -21,6 +21,9 @@ This tool provides deep visibility into network traffic, featuring advanced pars
 - **Full Stack Parsing:** Ethernet II, IP (v4/v6), TCP, and UDP.
 - **Network Stats:** Real-time tracking of top talkers, bandwidth usage, and protocol distribution.
 
+###  Performance & Architecture
+- **Zero-Copy Capture (MMAP):** Implementation of Linux `PACKET_MMAP` (RX_RING) with `TPACKET_V2` to map kernel buffers directly into user space. This drastically reduces CPU usage and packet drops by eliminating the overhead of copying packets from kernel to user memory (standard `recv()` calls).
+
 ###  Dashboard
 - **Rich TUI:** A lightweight, non-blocking terminal interface utilizing the `rich` library.
 - **Live Stream:** Color-coded packet log for instant protocol identification (Green=Mgmt, Yellow=Control, Red=Auth, Blue=Data).
