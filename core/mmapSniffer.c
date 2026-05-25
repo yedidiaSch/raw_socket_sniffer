@@ -16,6 +16,7 @@
 #include <linux/if_packet.h>
 #include <poll.h>
 #include <errno.h>
+#include <time.h>
 #include <net/if_arp.h>
 #include <sys/ioctl.h>
 #include <net/if.h>
@@ -112,6 +113,11 @@ void start_zero_copy_capture(int sock_fd) {
     struct tpacket2_hdr *header;
     struct pollfd pfd;
 
+    // Throttle the LOSING warning: kernel sets it on every frame after loss
+    // begins, so a naive log floods the queue.
+    unsigned long pending_drops = 0;
+    time_t last_drop_log = 0;
+
     // Setup polling
     pfd.fd = sock_fd;
     pfd.events = POLLIN;
@@ -136,9 +142,16 @@ void start_zero_copy_capture(int sock_fd) {
 
         // --- PROCESSING: Data is ready in User Space ---
         
-        // Safety check for packet loss
+        // Safety check for packet loss (throttled — see comment above)
         if (header->tp_status & TP_STATUS_LOSING) {
-             log_message("[WARN] Ring Buffer Full - Packet Dropped by Kernel\n");
+            pending_drops++;
+            time_t now = time(NULL);
+            if (now - last_drop_log >= 1) {
+                log_message("[WARN] Ring Buffer Full - %lu frames flagged since last warn\n",
+                            pending_drops);
+                pending_drops = 0;
+                last_drop_log = now;
+            }
         }
         
         // Get pointer to the actual packet data

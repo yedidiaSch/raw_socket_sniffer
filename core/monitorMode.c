@@ -14,36 +14,32 @@
 static int mhz_to_channel(int freq);
 static void save_handshake_to_file(const unsigned char* buffer, int size);
 static void write_pcap_global_header(FILE *fp);
-static void print_hex_dump(const unsigned char* buffer, int length);
+static void parse_radiotap(const unsigned char* buffer, int radiotap_len,
+                           PacketMetadata* meta);
 
 
 void parse_monitor_packet(const unsigned char* buffer, int size, PacketMetadata* meta) {
-    // 1. Validate Radiotap Header Length
-    // The length is a 16-bit integer at offset 2 (Little Endian)
-    if (size < 4) return;
-    uint16_t radiotap_len = *(uint16_t*)(buffer + 2);
+    // 1. Validate Radiotap Header Length (LE u16 at offset 2)
+    if (size < 8) return;
+    uint16_t radiotap_len;
+    memcpy(&radiotap_len, buffer + 2, sizeof(radiotap_len));
 
     // Sanity checks
-    if (radiotap_len >= size || radiotap_len < 10) return;
+    if (radiotap_len >= size || radiotap_len < 8) return;
 
-    // 2. Extract Physical Metadata (Frequency, RSSI)
-    // Note: Offsets might vary based on Radiotap fields present, 
-    // but usually Freq is at 26 and RSSI (Signal) at 30 for standard drivers.
-    if (radiotap_len >= 30) {
-        uint16_t freq = *(uint16_t*)(buffer + 26);
-        meta->channel = mhz_to_channel(freq);
-        meta->signal_dbm = (int8_t)buffer[30];
-    }
+    // 2. Extract Physical Metadata (Frequency, RSSI) via proper Radiotap walk
+    parse_radiotap(buffer, radiotap_len, meta);
 
     meta->is_monitor_mode = 1;
     memset(meta->ssid, 0, sizeof(meta->ssid));
 
     // Define the start of the 802.11 Frame
-    int offset = radiotap_len; 
+    int offset = radiotap_len;
     if (offset + 24 >= size) return; // Ensure header fits
 
     // 3. Parse 802.11 Frame Control
-    uint16_t frame_control = *(uint16_t*)(buffer + offset);
+    uint16_t frame_control;
+    memcpy(&frame_control, buffer + offset, sizeof(frame_control));
     uint8_t type = (frame_control >> 2) & 0x3;
     uint8_t subtype = (frame_control >> 4) & 0xF;
 
@@ -82,7 +78,11 @@ void parse_monitor_packet(const unsigned char* buffer, int size, PacketMetadata*
                 if (body_offset + 2 + tag_len > size) break;
 
                 if (tag_id == 0) { // SSID Tag
-                    int copy_len = (tag_len < 32) ? tag_len : 32;
+                    // Cap to ssid buffer minus the terminator. memset above
+                    // already zeroed the whole buffer, so the explicit NUL is
+                    // belt-and-suspenders.
+                    size_t max_ssid = sizeof(meta->ssid) - 1;
+                    size_t copy_len = (tag_len < max_ssid) ? tag_len : max_ssid;
                     if (copy_len > 0) {
                         memcpy(meta->ssid, buffer + body_offset + 2, copy_len);
                         meta->ssid[copy_len] = '\0';
@@ -142,6 +142,75 @@ static int mhz_to_channel(int freq) {
     return (freq - 5000) / 5;
 }
 
+/**
+ * Walk the Radiotap header per the spec: read it_present (and any extension
+ * present words, signalled by bit 31), then iterate the fields in bit order
+ * applying each field's natural alignment relative to the radiotap header
+ * start. Extract channel frequency (bit 3) and antenna signal dBm (bit 5).
+ *
+ * Field table is the subset needed to walk past everything that may appear
+ * before bit 5 across common chipsets; trailing fields are listed for
+ * completeness so the offset stays consistent if drivers add more.
+ */
+static void parse_radiotap(const unsigned char* buffer, int radiotap_len,
+                           PacketMetadata* meta) {
+    static const struct { int bit; int align; int size; } fields[] = {
+        { 0, 8, 8},  // TSFT
+        { 1, 1, 1},  // FLAGS
+        { 2, 1, 1},  // RATE
+        { 3, 2, 4},  // CHANNEL (freq + flags)
+        { 4, 1, 2},  // FHSS
+        { 5, 1, 1},  // DBM_ANTSIGNAL
+        { 6, 1, 1},  // DBM_ANTNOISE
+        { 7, 2, 2},  // LOCK_QUALITY
+        { 8, 2, 2},  // TX_ATTENUATION
+        { 9, 2, 2},  // DB_TX_ATTENUATION
+        {10, 1, 1},  // DBM_TX_POWER
+        {11, 1, 1},  // ANTENNA
+        {12, 1, 1},  // DB_ANTSIGNAL
+        {13, 1, 1},  // DB_ANTNOISE
+        {14, 2, 2},  // RX_FLAGS
+        {15, 2, 2},  // TX_FLAGS
+        {16, 1, 1},  // RTS_RETRIES
+        {17, 1, 1},  // DATA_RETRIES
+        {19, 1, 3},  // MCS
+        {20, 4, 8},  // AMPDU_STATUS
+        {21, 2,12},  // VHT
+    };
+
+    if (radiotap_len < 8) return;
+
+    uint32_t present;
+    memcpy(&present, buffer + 4, sizeof(present));
+
+    // Skip extension present words (bit 31 = another u32 follows).
+    int offset = 8;
+    uint32_t cur = present;
+    while (cur & (1u << 31)) {
+        if (offset + 4 > radiotap_len) return;
+        memcpy(&cur, buffer + offset, sizeof(cur));
+        offset += 4;
+    }
+
+    for (size_t i = 0; i < sizeof(fields) / sizeof(fields[0]); i++) {
+        if (!(present & (1u << fields[i].bit))) continue;
+
+        int misalign = offset % fields[i].align;
+        if (misalign) offset += fields[i].align - misalign;
+        if (offset + fields[i].size > radiotap_len) return;
+
+        if (fields[i].bit == 3) {
+            uint16_t freq;
+            memcpy(&freq, buffer + offset, sizeof(freq));
+            meta->channel = mhz_to_channel(freq);
+        } else if (fields[i].bit == 5) {
+            meta->signal_dbm = (int8_t)buffer[offset];
+        }
+
+        offset += fields[i].size;
+    }
+}
+
 static void write_pcap_global_header(FILE *fp) {
     uint32_t magic_number = 0xa1b2c3d4; // PCAP Magic Number
     uint16_t version_major = 2;
@@ -193,12 +262,3 @@ static void save_handshake_to_file(const unsigned char* buffer, int size) {
     log_message("[DISK] Saved EAPOL packet (%d bytes) to %s\n", size, filename);
 }
 
-static void print_hex_dump(const unsigned char* buffer, int length) {
-    char debug_buf[1024] = "";
-    int pos = 0;
-    // Limit dump to first 32 bytes to avoid log flooding
-    for (int i = 0; i < length && i < 32; i++) { 
-        pos += snprintf(debug_buf + pos, sizeof(debug_buf) - pos, "%02X ", buffer[i]);
-    }
-    log_message("[HEX] %s\n", debug_buf);
-}

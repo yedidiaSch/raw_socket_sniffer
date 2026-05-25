@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <pthread.h>
+#include <time.h>
 #include "logger.h"
 #include "udp_sender.h"
 
@@ -26,6 +27,14 @@ typedef struct LogNode {
 
 static LogNode* head = NULL;
 static LogNode* tail = NULL;
+
+// Bound the queue: the capture loop can outpace the logger thread under load,
+// so an unbounded queue grows until OOM. New items are dropped when full and
+// the dropped count is reported periodically.
+#define LOGGER_QUEUE_MAX 10000
+static size_t queue_len = 0;
+static unsigned long dropped_count = 0;
+static time_t last_drop_report = 0;
 
 // --- Synchronization ---
 static pthread_mutex_t queue_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -58,6 +67,7 @@ static void* logger_worker(void* arg) {
         if (head == NULL) {
             tail = NULL;
         }
+        if (queue_len > 0) queue_len--;
 
         pthread_mutex_unlock(&queue_mutex);
 
@@ -80,7 +90,7 @@ void init_logger() {
     if (logger_running) return;
     
     // Initialize UDP sender
-    init_udp_sender("127.0.0.1", 5005);
+    init_udp_sender("127.0.0.1", DASHBOARD_UDP_PORT);
 
     logger_running = 1;
     if (pthread_create(&logger_thread, NULL, logger_worker, NULL) != 0) {
@@ -128,14 +138,28 @@ void log_message(const char* fmt, ...) {
     node->message = buffer;
     node->next = NULL;
 
-    // Add to queue
+    // Add to queue (drop if full)
     pthread_mutex_lock(&queue_mutex);
+    if (queue_len >= LOGGER_QUEUE_MAX) {
+        dropped_count++;
+        time_t now = time(NULL);
+        if (now - last_drop_report >= 5) {
+            fprintf(stderr, "[WARN] Logger queue full - %lu messages dropped\n", dropped_count);
+            dropped_count = 0;
+            last_drop_report = now;
+        }
+        pthread_mutex_unlock(&queue_mutex);
+        free(buffer);
+        free(node);
+        return;
+    }
     if (tail) {
         tail->next = node;
         tail = node;
     } else {
         head = tail = node;
     }
+    queue_len++;
     pthread_cond_signal(&queue_cond);
     pthread_mutex_unlock(&queue_mutex);
 }
@@ -151,14 +175,27 @@ void log_packet(const PacketMetadata* meta) {
     node->message = NULL;
     node->next = NULL;
 
-    // Add to queue
+    // Add to queue (drop if full)
     pthread_mutex_lock(&queue_mutex);
+    if (queue_len >= LOGGER_QUEUE_MAX) {
+        dropped_count++;
+        time_t now = time(NULL);
+        if (now - last_drop_report >= 5) {
+            fprintf(stderr, "[WARN] Logger queue full - %lu messages dropped\n", dropped_count);
+            dropped_count = 0;
+            last_drop_report = now;
+        }
+        pthread_mutex_unlock(&queue_mutex);
+        free(node);
+        return;
+    }
     if (tail) {
         tail->next = node;
         tail = node;
     } else {
         head = tail = node;
     }
+    queue_len++;
     pthread_cond_signal(&queue_cond);
     pthread_mutex_unlock(&queue_mutex);
 }

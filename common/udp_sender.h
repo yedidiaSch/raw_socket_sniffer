@@ -8,6 +8,11 @@
 
 #include "Types.h"
 
+// Port the C sniffer streams metadata to (consumed by the Python dashboard).
+// Exposed so the parser can filter our own UDP traffic when the sniffed
+// interface also carries the dashboard packets (e.g. lo).
+#define DASHBOARD_UDP_PORT 5005
+
 /**
  * @brief Initializes the UDP socket for sending logs.
  * 
