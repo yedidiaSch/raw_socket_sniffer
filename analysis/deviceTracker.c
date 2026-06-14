@@ -513,7 +513,7 @@ static void send_dashboard_summary(const Findings* f) {
     #undef EMIT
 
     // --- Authoritative AP inventory ---
-    o += snprintf(buf + o, sizeof(buf) - o, "],\"aps\":[");
+    o += snprintf(buf + o, sizeof(buf) - o, "],\"ap_inventory\":[");
     first = 1;
     for (int i = 0; i < ap_count; i++) {
         if (!aps[i].used) continue;
@@ -533,7 +533,7 @@ static void send_dashboard_summary(const Findings* f) {
     }
 
     // --- Authoritative client inventory ---
-    o += snprintf(buf + o, sizeof(buf) - o, "],\"clients\":[");
+    o += snprintf(buf + o, sizeof(buf) - o, "],\"client_inventory\":[");
     first = 1;
     for (int i = 0; i < client_count; i++) {
         if (!clients[i].used) continue;

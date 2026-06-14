@@ -104,9 +104,9 @@ class Collector:
         self.threats = threats
 
         # Authoritative inventory tables (present only with an enriched C build).
-        if isinstance(m.get("aps"), list) and isinstance(m.get("clients"), list):
-            self.c_aps = m["aps"]
-            self.c_clients = m["clients"]
+        if isinstance(m.get("ap_inventory"), list) and isinstance(m.get("client_inventory"), list):
+            self.c_aps = m["ap_inventory"]
+            self.c_clients = m["client_inventory"]
             self.c_inventory_ts = time.time()
 
     def _ingest_packet(self, p):
