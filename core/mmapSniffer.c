@@ -22,7 +22,8 @@
 #include <net/if.h>
 
 // Global flag from main.c to control the loop
-extern volatile int keep_running;
+#include <signal.h>
+extern volatile sig_atomic_t keep_running;
 
 // --- Private Context (Encapsulated) ---
 // These variables are static so they are hidden from other files.
@@ -80,7 +81,10 @@ int setup_zero_copy_ring(int sock_fd) {
     memset(&ring_ctx.req, 0, sizeof(ring_ctx.req));
     ring_ctx.req.tp_block_size = block_size;
     ring_ctx.req.tp_frame_size = frame_size;
-    ring_ctx.req.tp_block_nr   = 64; // Number of blocks (Depth of buffer)
+    // Depth of the buffer. The previous 64 blocks (~256 KB) filled within tens
+    // of milliseconds on a busy link, so any scheduling hiccup in the consumer
+    // caused kernel drops. 512 blocks (~2 MB) gives a much larger cushion.
+    ring_ctx.req.tp_block_nr   = 512;
     
     // Calculate frame count: (BlockSize * BlockCount) / FrameSize
     ring_ctx.req.tp_frame_nr = (ring_ctx.req.tp_block_size * ring_ctx.req.tp_block_nr) / ring_ctx.req.tp_frame_size;

@@ -15,6 +15,41 @@
 static int sockfd = -1;
 static struct sockaddr_in server_addr;
 
+/**
+ * @brief Escapes a wire-sourced string for safe embedding inside a JSON value.
+ *
+ * The SSID comes straight from beacon/probe frames and is fully attacker
+ * controlled. Without escaping, an SSID such as  foo", "x": "  would inject
+ * arbitrary keys into the dashboard JSON. We escape the JSON-significant
+ * characters and drop other control bytes. Output is always NUL-terminated and
+ * never exceeds out_size.
+ */
+static void json_escape(const char* in, char* out, size_t out_size) {
+    size_t o = 0;
+    if (out_size == 0) return;
+    for (size_t i = 0; in[i] != '\0' && o + 2 < out_size; i++) {
+        unsigned char c = (unsigned char)in[i];
+        switch (c) {
+            case '"':  out[o++] = '\\'; out[o++] = '"';  break;
+            case '\\': out[o++] = '\\'; out[o++] = '\\'; break;
+            case '\n': out[o++] = '\\'; out[o++] = 'n';  break;
+            case '\r': out[o++] = '\\'; out[o++] = 'r';  break;
+            case '\t': out[o++] = '\\'; out[o++] = 't';  break;
+            default:
+                if (c < 0x20) {
+                    // Other control characters: need \uXXXX (6 bytes).
+                    if (o + 6 >= out_size) goto done;
+                    o += snprintf(out + o, out_size - o, "\\u%04x", c);
+                } else {
+                    out[o++] = (char)c;
+                }
+                break;
+        }
+    }
+done:
+    out[o] = '\0';
+}
+
 int init_udp_sender(const char* ip, int port) 
 {
     if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
@@ -28,6 +63,8 @@ int init_udp_sender(const char* ip, int port)
     
     if (inet_pton(AF_INET, ip, &server_addr.sin_addr) <= 0) {
         perror("Invalid address/ Address not supported");
+        close(sockfd);
+        sockfd = -1;
         return -1;
     }
 
@@ -78,6 +115,11 @@ void send_udp_metadata(const PacketMetadata* meta)
     }
 
     // 2. Construct JSON
+    // Escape the attacker-controlled SSID. Worst case each byte expands to the
+    // 6-char \uXXXX form, so size the buffer accordingly.
+    char ssid_escaped[sizeof(meta->ssid) * 6 + 1];
+    json_escape(meta->ssid, ssid_escaped, sizeof(ssid_escaped));
+
     char json_buffer[4096];
     snprintf(json_buffer, sizeof(json_buffer), 
         "{"
@@ -109,7 +151,7 @@ void send_udp_metadata(const PacketMetadata* meta)
         meta->is_monitor_mode,
         meta->signal_dbm,
         meta->channel,
-        meta->ssid
+        ssid_escaped
     );
 
     // 3. Send
@@ -117,7 +159,16 @@ void send_udp_metadata(const PacketMetadata* meta)
            (const struct sockaddr *)&server_addr, sizeof(server_addr));
 }
 
-void close_udp_sender() 
+void send_udp_json(const char* json)
+{
+    if (sockfd < 0 || !json) {
+        return;
+    }
+    sendto(sockfd, json, strlen(json), 0,
+           (const struct sockaddr *)&server_addr, sizeof(server_addr));
+}
+
+void close_udp_sender()
 {
     if (sockfd >= 0) {
         close(sockfd);

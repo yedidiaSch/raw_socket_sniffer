@@ -25,14 +25,23 @@ uint8_t parse_ip(const unsigned char* buffer, int size, int* header_len, PacketM
 
     struct iphdr *iph = (struct iphdr *)buffer;
 
+    // Validate IHL before trusting it. IHL is a 4-bit field counting 32-bit
+    // words; the legal range is 5 (20-byte minimum header) to 15. A forged
+    // value would otherwise yield a header length that points past the buffer
+    // or lands inside the IP header, corrupting the L4 pointer downstream.
+    int ip_header_len = iph->ihl * 4;
+    if (iph->ihl < 5 || ip_header_len > size) {
+        *header_len = 0;
+        return 0;
+    }
+
     // Fill Metadata
     meta->ip_version = 4;
     inet_ntop(AF_INET, &iph->saddr, meta->src_ip, INET6_ADDRSTRLEN);
     inet_ntop(AF_INET, &iph->daddr, meta->dest_ip, INET6_ADDRSTRLEN);
     meta->l3_protocol = iph->protocol;
 
-    // Calculate the length of the IP header (IHL is in 32-bit words, so multiply by 4)
-    *header_len = iph->ihl * 4;
+    *header_len = ip_header_len;
 
     return iph->protocol;
 }

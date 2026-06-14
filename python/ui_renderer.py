@@ -32,7 +32,13 @@ def create_layout():
     # Internal division of main area
     layout["main"].split_row(
         Layout(name="packets", ratio=2),
-        Layout(name="stats", ratio=1)
+        Layout(name="side", ratio=1)
+    )
+
+    # The right column stacks live stats on top and the security summary below.
+    layout["side"].split_column(
+        Layout(name="stats", ratio=1),
+        Layout(name="security", ratio=1)
     )
     
     layout["header"].update(Panel(Text("📡 WiFi & Network Sniffer Dashboard", justify="center", style="bold white"), style="bold blue"))
@@ -208,5 +214,55 @@ def render_stats_panel(top_talkers, protocols, total_bytes):
         
     # Part 3: Total Traffic
     text.append(f"\n📦 Total: {total_bytes / 1024:.2f} KB", style="bold white on blue")
-    
+
     return Panel(text, title="Network Stats", border_style="red")
+
+
+def render_security_panel(report):
+    """Renders the security summary pushed by the C device tracker."""
+    text = Text()
+
+    if not report:
+        text.append("Waiting for security summary...\n", style="dim")
+        text.append("(monitor mode only)", style="dim italic")
+        return Panel(text, title="🛡  Security", border_style="grey50")
+
+    # Headline counters
+    text.append("🛡  Devices & Threats\n", style="bold underline cyan")
+    text.append(f"APs: {report.get('aps', 0)}   "
+                f"Clients: {report.get('clients', 0)}\n", style="white")
+
+    def counter(label, value, warn_style):
+        style = warn_style if value else "dim"
+        text.append(f"  {label:<14}: {value}\n", style=style)
+
+    counter("Open networks", report.get('open_networks', 0), "yellow")
+    counter("Evil twins",    report.get('evil_twins', 0), "bold red")
+    counter("Karma APs",     report.get('karma', 0), "bold red")
+    counter("MAC leaks",     report.get('mac_leaks', 0), "magenta")
+    counter("Deauth frames", report.get('deauth_frames', 0), "yellow")
+
+    if report.get('deauth_flood'):
+        text.append("\n⚠ DEAUTH FLOOD ACTIVE!\n", style="bold white on red blink")
+
+    # Findings list
+    findings = report.get('findings', [])
+    if findings:
+        text.append("\n🔎 Findings\n", style="bold underline gold1")
+        for f in findings[:8]:
+            if "[ALERT]" in f:
+                style = "bold red"
+            elif "[WARN]" in f:
+                style = "yellow"
+            elif "[PRIV]" in f:
+                style = "magenta"
+            else:
+                style = "white"
+            # Trim long lines so the panel doesn't wrap excessively
+            line = f if len(f) <= 42 else f[:41] + "…"
+            text.append(f"• {line}\n", style=style)
+
+    border = "red" if (report.get('evil_twins') or report.get('karma')
+                       or report.get('deauth_flood')) else "green"
+    return Panel(text, title=f"🛡  Security  (upd {report.get('timestamp', '')})",
+                 border_style=border)

@@ -24,10 +24,20 @@ int init_udp_sender(const char* ip, int port);
 
 /**
  * @brief Sends the packet metadata struct over UDP.
- * 
+ *
  * @param meta Pointer to the metadata struct.
  */
 void send_udp_metadata(const PacketMetadata* meta);
+
+/**
+ * @brief Sends a pre-formatted JSON string to the dashboard.
+ *
+ * Used by the device tracker to push the periodic security summary on the same
+ * UDP channel. The receiver distinguishes message kinds via a "msg_type" field.
+ *
+ * @param json NUL-terminated JSON document.
+ */
+void send_udp_json(const char* json);
 
 /**
  * @brief Closes the UDP socket.

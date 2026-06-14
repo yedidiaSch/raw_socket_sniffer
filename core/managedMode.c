@@ -33,6 +33,14 @@ void parse_managed_packet(const unsigned char* buffer, int size, PacketMetadata*
         // parse_network_layer should return the L4 Protocol (TCP/UDP/ICMP)
         uint8_t protocol = parse_network_layer(network_buffer, network_remaining_size, &network_header_len, meta);
 
+        // Guard against a malformed/short L3 header. parse_network_layer
+        // returns header_len == 0 on failure; a non-positive length or a
+        // length that exceeds what we captured would make transport_buffer
+        // point out of bounds (or yield a negative remaining size).
+        if (network_header_len <= 0 || network_header_len > network_remaining_size) {
+            return;
+        }
+
         // --- Layer 4: Transport (TCP / UDP) ---
         const unsigned char* transport_buffer = network_buffer + network_header_len;
         int transport_remaining_size = network_remaining_size - network_header_len;

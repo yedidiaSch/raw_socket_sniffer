@@ -29,6 +29,7 @@ set(SOURCES
     layers/ethernetLayer.c
     layers/networkLayer.c
     layers/transportLayer.c
+    analysis/deviceTracker.c
     common/logger.c
     common/udp_sender.c
 )
@@ -44,6 +45,7 @@ set(HEADERS
     layers/ethernetLayer.h
     layers/networkLayer.h
     layers/transportLayer.h
+    analysis/deviceTracker.h
     common/logger.h
     common/udp_sender.h
 )
@@ -62,6 +64,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/socket
     ${CMAKE_CURRENT_SOURCE_DIR}/core
     ${CMAKE_CURRENT_SOURCE_DIR}/layers
+    ${CMAKE_CURRENT_SOURCE_DIR}/analysis
 )
 
 # Build type configuration
@@ -86,7 +89,7 @@ message(STATUS "C Compiler: ${CMAKE_C_COMPILER}")
 add_custom_target(run
     COMMAND $<TARGET_FILE:${PROJECT_NAME}>
     DEPENDS ${PROJECT_NAME}
-    WORKING_DIRECTORY ${CMAKE_PROJECT_DIR}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Running ${PROJECT_NAME}..."
     USES_TERMINAL
 )
