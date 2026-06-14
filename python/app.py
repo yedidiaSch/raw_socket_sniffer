@@ -27,10 +27,14 @@ def main():
                     listener.get_protocol_stats(),
                     listener.get_total_traffic()
                 )
-                
+                security = ui_renderer.render_security_panel(
+                    listener.get_security_report()
+                )
+
                 # C. Update layout
                 layout["packets"].update(table)
                 layout["stats"].update(stats)
+                layout["security"].update(security)
                 
                 # D. Short sleep for CPU
                 sleep(0.1)

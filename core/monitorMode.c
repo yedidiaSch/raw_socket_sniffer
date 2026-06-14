@@ -5,6 +5,7 @@
 
 #include "monitorMode.h"
 #include "logger.h"
+#include "deviceTracker.h"
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -14,36 +15,32 @@
 static int mhz_to_channel(int freq);
 static void save_handshake_to_file(const unsigned char* buffer, int size);
 static void write_pcap_global_header(FILE *fp);
-static void print_hex_dump(const unsigned char* buffer, int length);
+static void parse_radiotap(const unsigned char* buffer, int radiotap_len,
+                           PacketMetadata* meta);
 
 
 void parse_monitor_packet(const unsigned char* buffer, int size, PacketMetadata* meta) {
-    // 1. Validate Radiotap Header Length
-    // The length is a 16-bit integer at offset 2 (Little Endian)
-    if (size < 4) return;
-    uint16_t radiotap_len = *(uint16_t*)(buffer + 2);
+    // 1. Validate Radiotap Header Length (LE u16 at offset 2)
+    if (size < 8) return;
+    uint16_t radiotap_len;
+    memcpy(&radiotap_len, buffer + 2, sizeof(radiotap_len));
 
     // Sanity checks
-    if (radiotap_len >= size || radiotap_len < 10) return;
+    if (radiotap_len >= size || radiotap_len < 8) return;
 
-    // 2. Extract Physical Metadata (Frequency, RSSI)
-    // Note: Offsets might vary based on Radiotap fields present, 
-    // but usually Freq is at 26 and RSSI (Signal) at 30 for standard drivers.
-    if (radiotap_len >= 30) {
-        uint16_t freq = *(uint16_t*)(buffer + 26);
-        meta->channel = mhz_to_channel(freq);
-        meta->signal_dbm = (int8_t)buffer[30];
-    }
+    // 2. Extract Physical Metadata (Frequency, RSSI) via proper Radiotap walk
+    parse_radiotap(buffer, radiotap_len, meta);
 
     meta->is_monitor_mode = 1;
     memset(meta->ssid, 0, sizeof(meta->ssid));
 
     // Define the start of the 802.11 Frame
-    int offset = radiotap_len; 
+    int offset = radiotap_len;
     if (offset + 24 >= size) return; // Ensure header fits
 
     // 3. Parse 802.11 Frame Control
-    uint16_t frame_control = *(uint16_t*)(buffer + offset);
+    uint16_t frame_control;
+    memcpy(&frame_control, buffer + offset, sizeof(frame_control));
     uint8_t type = (frame_control >> 2) & 0x3;
     uint8_t subtype = (frame_control >> 4) & 0xF;
 
@@ -53,9 +50,15 @@ void parse_monitor_packet(const unsigned char* buffer, int size, PacketMetadata*
         memcpy(meta->src_mac, buffer + offset + 10, 6);
     }
 
-    // === TYPE 0: MANAGEMENT FRAMES (Beacons / Probes) ===
+    // === TYPE 0: MANAGEMENT FRAMES (Beacons / Probes / Deauth) ===
     if (type == 0) {
-        int body_offset = offset + 24; 
+        // Deauthentication (12) / Disassociation (10): classic attack signal.
+        // Feed the source (Addr2) to the tracker for flood detection.
+        if (subtype == 12 || subtype == 10) {
+            tracker_observe_deauth(meta->src_mac);
+        }
+
+        int body_offset = offset + 24;
         char packet_type[15] = "UNKNOWN";
         int is_ssid_frame = 0;
 
@@ -74,7 +77,23 @@ void parse_monitor_packet(const unsigned char* buffer, int size, PacketMetadata*
             is_ssid_frame = 1;
         }
 
-        // Parse Tagged Parameters to find SSID (Tag 0)
+        // For beacons / probe responses the Capability Info field sits right
+        // after the 8-byte timestamp + 2-byte interval. Its Privacy bit (0x10)
+        // tells us whether the network is encrypted or OPEN.
+        int privacy = 0;
+        if (subtype == 8 || subtype == 5) {
+            int cap_off = offset + 24 + 10;
+            if (cap_off + 2 <= size) {
+                uint16_t cap;
+                memcpy(&cap, buffer + cap_off, sizeof(cap));
+                privacy = (cap & 0x0010) ? 1 : 0;
+            }
+        }
+
+        // Parse Tagged Parameters to find the SSID (Tag 0). real_ssid keeps the
+        // true network name ("" when hidden or wildcard) for the tracker, while
+        // meta->ssid carries display markers for the dashboard.
+        char real_ssid[33] = "";
         if (is_ssid_frame && body_offset < size) {
             while (body_offset + 2 <= size) {
                 uint8_t tag_id = buffer[body_offset];
@@ -82,16 +101,22 @@ void parse_monitor_packet(const unsigned char* buffer, int size, PacketMetadata*
                 if (body_offset + 2 + tag_len > size) break;
 
                 if (tag_id == 0) { // SSID Tag
-                    int copy_len = (tag_len < 32) ? tag_len : 32;
+                    // Cap to ssid buffer minus the terminator. memset above
+                    // already zeroed the whole buffer, so the explicit NUL is
+                    // belt-and-suspenders.
+                    size_t max_ssid = sizeof(meta->ssid) - 1;
+                    size_t copy_len = (tag_len < max_ssid) ? tag_len : max_ssid;
                     if (copy_len > 0) {
                         memcpy(meta->ssid, buffer + body_offset + 2, copy_len);
                         meta->ssid[copy_len] = '\0';
+                        memcpy(real_ssid, buffer + body_offset + 2, copy_len);
+                        real_ssid[copy_len] = '\0';
                     } else {
                         snprintf(meta->ssid, sizeof(meta->ssid), (subtype == 4) ? "[BROADCAST]" : "<HIDDEN>");
                     }
-                    
+
                     // Log relevant WiFi events
-                    log_message("[%s] [%02X:%02X:%02X:%02X:%02X:%02X] -> '%s' | CH:%d | PWR:%d\n", 
+                    log_message("[%s] [%02X:%02X:%02X:%02X:%02X:%02X] -> '%s' | CH:%d | PWR:%d\n",
                                 packet_type,
                                 meta->src_mac[0], meta->src_mac[1], meta->src_mac[2],
                                 meta->src_mac[3], meta->src_mac[4], meta->src_mac[5],
@@ -101,23 +126,57 @@ void parse_monitor_packet(const unsigned char* buffer, int size, PacketMetadata*
                 body_offset += 2 + tag_len;
             }
         }
+
+        // Feed the stateful device tracker (Addr2 = transmitter = BSSID for
+        // beacons / probe responses, station MAC for probe requests).
+        if (subtype == 8) {
+            tracker_observe_beacon(meta->src_mac, real_ssid, meta->channel,
+                                   meta->signal_dbm, privacy);
+        } else if (subtype == 4) {
+            tracker_observe_probe_req(meta->src_mac, real_ssid, meta->signal_dbm);
+        } else if (subtype == 5) {
+            tracker_observe_probe_resp(meta->src_mac, real_ssid, meta->channel,
+                                       meta->signal_dbm);
+        }
     }
 
     // === TYPE 2: DATA FRAMES (Encrypted Traffic) ===
     else if (type == 2) {
         snprintf(meta->ssid, sizeof(meta->ssid), "[Encrypted Data]");
-        
-        // EAPOL Handshake Detection
-        // Looking for the EAPOL signature: 0xAA 0xAA 0x03 ... 0x88 0x8E
+
+        // EAPOL Handshake Detection.
+        //
+        // Compute the exact 802.11 MAC header length from the Frame Control
+        // flags, then test the LLC/SNAP signature at that precise offset.
+        // The previous approach scanned the whole frame for AA AA 03 .. 88 8E,
+        // which produced false positives whenever that byte pattern appeared
+        // inside an encrypted payload.
+        //
+        // Base header (24): FC, Duration, Addr1, Addr2, Addr3, SeqCtrl.
+        int hdr = offset + 24;
+
+        // Address 4 is present only when both ToDS and FromDS are set.
+        if ((frame_control & 0x0300) == 0x0300) hdr += 6;
+
+        // QoS Control (2 bytes) is present for QoS data subtypes (bit 3 set).
+        int is_qos = (subtype & 0x08) != 0;
+        if (is_qos) hdr += 2;
+
+        // HT Control (4 bytes) is present when the Order bit is set on a QoS
+        // frame.
+        if (is_qos && (frame_control & 0x8000)) hdr += 4;
+
+        // EAPOL frames travel unprotected; a Protected (WEP) bit means the
+        // payload is encrypted and cannot contain a cleartext LLC/SNAP.
+        int is_protected = (frame_control & 0x4000) != 0;
+
+        // LLC/SNAP carrying EAPOL: AA AA 03 00 00 00 88 8E (8 bytes).
         int found_handshake = 0;
-        
-        // Optimistic scan starting after header
-        for (int i = offset + 24; i < size - 8; i++) {
-            if (buffer[i] == 0xAA && buffer[i+1] == 0xAA &&  
-                buffer[i+2] == 0x03 && buffer[i+6] == 0x88 && buffer[i+7] == 0x8E) {
-                found_handshake = 1;
-                break;
-            }
+        if (!is_protected && hdr + 8 <= size &&
+            buffer[hdr] == 0xAA && buffer[hdr + 1] == 0xAA &&
+            buffer[hdr + 2] == 0x03 && buffer[hdr + 6] == 0x88 &&
+            buffer[hdr + 7] == 0x8E) {
+            found_handshake = 1;
         }
 
         if (found_handshake) {
@@ -131,15 +190,89 @@ void parse_monitor_packet(const unsigned char* buffer, int size, PacketMetadata*
             save_handshake_to_file(buffer, size);
         }
     }
+
+    // Periodically flush the security report / dashboard summary (time-gated;
+    // cheap no-op between intervals).
+    tracker_tick();
 }
 
 // --- Internal Helper Implementation ---
 
 static int mhz_to_channel(int freq) {
-    if (freq < 2400 || freq > 6000) return 0;
-    if (freq == 2484) return 14;
-    if (freq < 2484) return (freq - 2407) / 5;
-    return (freq - 5000) / 5;
+    if (freq < 2400 || freq > 7125) return 0;
+    if (freq == 2484) return 14;                 // 2.4 GHz channel 14 (special)
+    if (freq < 2484) return (freq - 2407) / 5;   // 2.4 GHz channels 1-13
+    if (freq >= 5925) return (freq - 5950) / 5;  // 6 GHz band (WiFi 6E)
+    return (freq - 5000) / 5;                    // 5 GHz band
+}
+
+/**
+ * Walk the Radiotap header per the spec: read it_present (and any extension
+ * present words, signalled by bit 31), then iterate the fields in bit order
+ * applying each field's natural alignment relative to the radiotap header
+ * start. Extract channel frequency (bit 3) and antenna signal dBm (bit 5).
+ *
+ * Field table is the subset needed to walk past everything that may appear
+ * before bit 5 across common chipsets; trailing fields are listed for
+ * completeness so the offset stays consistent if drivers add more.
+ */
+static void parse_radiotap(const unsigned char* buffer, int radiotap_len,
+                           PacketMetadata* meta) {
+    static const struct { int bit; int align; int size; } fields[] = {
+        { 0, 8, 8},  // TSFT
+        { 1, 1, 1},  // FLAGS
+        { 2, 1, 1},  // RATE
+        { 3, 2, 4},  // CHANNEL (freq + flags)
+        { 4, 1, 2},  // FHSS
+        { 5, 1, 1},  // DBM_ANTSIGNAL
+        { 6, 1, 1},  // DBM_ANTNOISE
+        { 7, 2, 2},  // LOCK_QUALITY
+        { 8, 2, 2},  // TX_ATTENUATION
+        { 9, 2, 2},  // DB_TX_ATTENUATION
+        {10, 1, 1},  // DBM_TX_POWER
+        {11, 1, 1},  // ANTENNA
+        {12, 1, 1},  // DB_ANTSIGNAL
+        {13, 1, 1},  // DB_ANTNOISE
+        {14, 2, 2},  // RX_FLAGS
+        {15, 2, 2},  // TX_FLAGS
+        {16, 1, 1},  // RTS_RETRIES
+        {17, 1, 1},  // DATA_RETRIES
+        {19, 1, 3},  // MCS
+        {20, 4, 8},  // AMPDU_STATUS
+        {21, 2,12},  // VHT
+    };
+
+    if (radiotap_len < 8) return;
+
+    uint32_t present;
+    memcpy(&present, buffer + 4, sizeof(present));
+
+    // Skip extension present words (bit 31 = another u32 follows).
+    int offset = 8;
+    uint32_t cur = present;
+    while (cur & (1u << 31)) {
+        if (offset + 4 > radiotap_len) return;
+        memcpy(&cur, buffer + offset, sizeof(cur));
+        offset += 4;
+    }
+
+    for (size_t i = 0; i < sizeof(fields) / sizeof(fields[0]); i++) {
+        if (!(present & (1u << fields[i].bit))) continue;
+
+        int misalign = offset % fields[i].align;
+        if (misalign) offset += fields[i].align - misalign;
+        if (offset + fields[i].size > radiotap_len) return;
+
+        if (fields[i].bit == 3) {
+            uint16_t freq;
+            memcpy(&freq, buffer + offset, sizeof(freq));
+            meta->channel = mhz_to_channel(freq);
+        } else if (fields[i].bit == 5) {
+            meta->signal_dbm = (int8_t)buffer[offset];
+        }
+
+        offset += fields[i].size;
+    }
 }
 
 static void write_pcap_global_header(FILE *fp) {
@@ -169,9 +302,11 @@ static void save_handshake_to_file(const unsigned char* buffer, int size) {
         return;
     }
 
-    // Check if file is empty (needs header)
-    fseek(fp, 0, SEEK_END);
-    if (ftell(fp) == 0) {
+    // Check if file is empty (needs header). Only write the global header when
+    // we can positively confirm the file is empty; if fseek/ftell fail, skip
+    // it rather than risk writing a duplicate/misplaced header into an
+    // existing capture.
+    if (fseek(fp, 0, SEEK_END) == 0 && ftell(fp) == 0) {
         write_pcap_global_header(fp);
     }
 
@@ -193,12 +328,3 @@ static void save_handshake_to_file(const unsigned char* buffer, int size) {
     log_message("[DISK] Saved EAPOL packet (%d bytes) to %s\n", size, filename);
 }
 
-static void print_hex_dump(const unsigned char* buffer, int length) {
-    char debug_buf[1024] = "";
-    int pos = 0;
-    // Limit dump to first 32 bytes to avoid log flooding
-    for (int i = 0; i < length && i < 32; i++) { 
-        pos += snprintf(debug_buf + pos, sizeof(debug_buf) - pos, "%02X ", buffer[i]);
-    }
-    log_message("[HEX] %s\n", debug_buf);
-}

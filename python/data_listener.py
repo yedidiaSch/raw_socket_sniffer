@@ -19,18 +19,27 @@ class PacketListener:
         self.protocol_counter = Counter()         # Count protocols
         self.total_bytes = 0
 
+        # Latest security summary pushed by the C tracker (msg_type=="security_report")
+        self.security_report = None
+
     def fetch_packets(self):
         """Reads all packets accumulated in buffer"""
         while True:
             try:
                 data, _ = self.sock.recvfrom(4096)
                 packet = json.loads(data.decode('utf-8'))
-                
+
+                # Route the periodic security summary separately from packets.
+                if packet.get('msg_type') == 'security_report':
+                    packet['timestamp'] = datetime.now().strftime("%H:%M:%S")
+                    self.security_report = packet
+                    continue
+
                 # Add local time for display
                 packet['timestamp'] = datetime.now().strftime("%H:%M:%S")
-                
+
                 self._update_stats(packet)
-                
+
             except BlockingIOError:
                 break # No more data at the moment
             except json.JSONDecodeError as e:
@@ -69,3 +78,6 @@ class PacketListener:
 
     def get_total_traffic(self):
         return self.total_bytes
+
+    def get_security_report(self):
+        return self.security_report
