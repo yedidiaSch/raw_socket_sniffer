@@ -17,7 +17,12 @@ Note: only one consumer can bind UDP 5005 at a time, so run EITHER the rich TUI
 import asyncio
 import json
 import contextlib
+import os
+import sys
 from pathlib import Path
+
+# Allow `python /path/to/web/server.py` from any working directory.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
