@@ -443,9 +443,40 @@ static void write_report_file(const Findings* f) {
     (void)f;
 }
 
+// Build a JSON array body (comma-separated quoted tokens, no brackets) of the
+// flag names set in f. Names match the dashboard's badge classes.
+static void flags_json(uint16_t f, char* out, size_t n) {
+    size_t o = 0; out[0] = '\0'; int first = 1;
+    #define JF(s) do { \
+        int w = snprintf(out + o, n - o, "%s\"%s\"", first ? "" : ",", s); \
+        if (w > 0 && (size_t)(o + w) < n) { o += (size_t)w; first = 0; } \
+    } while (0)
+    if (f & FLAG_OPEN_NETWORK)    JF("OPEN");
+    if (f & FLAG_EVIL_TWIN_OUI)   JF("EVIL-TWIN!");
+    else if (f & FLAG_EVIL_TWIN)  JF("dup-SSID");
+    if (f & FLAG_HIDDEN_SSID)     JF("hidden");
+    if (f & FLAG_MAC_LEAK)        JF("MAC-LEAK");
+    if (f & FLAG_RANDOMIZED_MAC)  JF("rand-MAC");
+    if (f & FLAG_KARMA)           JF("KARMA!");
+    if (f & FLAG_DEAUTH_SOURCE)   JF("DEAUTH-SRC!");
+    #undef JF
+}
+
+// Resolve a vendor label into vbuf (OUI hex fallback) and return it.
+static const char* vendor_label(const uint8_t mac[6], char* vbuf, size_t n) {
+    const char* v = oui_vendor(mac);
+    if (v) return v;
+    snprintf(vbuf, n, "%02X:%02X:%02X", mac[0], mac[1], mac[2]);
+    return vbuf;
+}
+
 static void send_dashboard_summary(const Findings* f) {
-    // Compact structured summary the Python listener can route on msg_type.
-    char buf[2048];
+    // Structured summary + full inventory tables the dashboard routes on
+    // msg_type. Static (not stack) because it can approach a UDP datagram in
+    // size; on loopback datagrams up to ~64 KB are fine and the consumers read
+    // with a 64 KB buffer.
+    static char buf[60000];
+    const int LIMIT = (int)sizeof(buf);
     int o = snprintf(buf, sizeof(buf),
         "{\"msg_type\":\"security_report\","
         "\"aps\":%d,\"clients\":%d,\"deauth_frames\":%u,"
@@ -463,17 +494,17 @@ static void send_dashboard_summary(const Findings* f) {
         json_escape(line, esc, sizeof(esc)); \
         int wrote = snprintf(buf + o, sizeof(buf) - o, "%s\"[%s] %s\"", \
                              first ? "" : ",", sev, esc); \
-        if (wrote > 0 && (size_t)(o + wrote) < sizeof(buf)) { o += wrote; first = 0; } \
+        if (wrote > 0 && (o + wrote) < LIMIT) { o += wrote; first = 0; } \
     } while (0)
 
     if (deauth_flood_active) EMIT("ALERT", "Deauth flood: %u frames/window", deauth_window);
-    for (int i = 0; i < ap_count && o < (int)sizeof(buf) - 200; i++) {
+    for (int i = 0; i < ap_count && o < LIMIT - 200; i++) {
         if (!aps[i].used) continue;
         if (aps[i].flags & FLAG_EVIL_TWIN_OUI) EMIT("ALERT", "Evil twin: %s", aps[i].ssid);
         if (aps[i].flags & FLAG_KARMA)         EMIT("ALERT", "Karma AP answered %d SSIDs", aps[i].answered_count);
         if (aps[i].flags & FLAG_OPEN_NETWORK)  EMIT("WARN", "Open network: %s", aps[i].ssid[0] ? aps[i].ssid : "<hidden>");
     }
-    for (int i = 0; i < client_count && o < (int)sizeof(buf) - 200; i++) {
+    for (int i = 0; i < client_count && o < LIMIT - 200; i++) {
         if (clients[i].used && (clients[i].flags & FLAG_MAC_LEAK)) {
             char ms[18]; mac_str(clients[i].mac, ms);
             EMIT("PRIV", "MAC leak from %s", ms);
@@ -481,7 +512,51 @@ static void send_dashboard_summary(const Findings* f) {
     }
     #undef EMIT
 
-    if ((size_t)o < sizeof(buf) - 3) {
+    // --- Authoritative AP inventory ---
+    o += snprintf(buf + o, sizeof(buf) - o, "],\"aps\":[");
+    first = 1;
+    for (int i = 0; i < ap_count; i++) {
+        if (!aps[i].used) continue;
+        if (LIMIT - o < 400) break;  // keep room to close the JSON cleanly
+        char bs[18]; mac_str(aps[i].bssid, bs);
+        char ssid_e[TRACKER_SSID_LEN * 2]; json_escape(aps[i].ssid, ssid_e, sizeof(ssid_e));
+        char vbuf[16]; const char* v = vendor_label(aps[i].bssid, vbuf, sizeof(vbuf));
+        char fl[160]; flags_json(aps[i].flags, fl, sizeof(fl));
+        o += snprintf(buf + o, sizeof(buf) - o,
+            "%s{\"bssid\":\"%s\",\"ssid\":\"%s\",\"vendor\":\"%s\","
+            "\"channel\":%d,\"security\":\"%s\",\"rssi\":%d,\"beacons\":%u,"
+            "\"flags\":[%s]}",
+            first ? "" : ",", bs, ssid_e, v, aps[i].channel,
+            aps[i].privacy ? "ENC" : "OPEN", aps[i].signal_best,
+            aps[i].beacons, fl);
+        first = 0;
+    }
+
+    // --- Authoritative client inventory ---
+    o += snprintf(buf + o, sizeof(buf) - o, "],\"clients\":[");
+    first = 1;
+    for (int i = 0; i < client_count; i++) {
+        if (!clients[i].used) continue;
+        if (LIMIT - o < 400) break;
+        char ms[18]; mac_str(clients[i].mac, ms);
+        char fl[160]; flags_json(clients[i].flags, fl, sizeof(fl));
+        char probed[TRACKER_PROBES_PER_CLIENT * (TRACKER_SSID_LEN * 2 + 4)];
+        size_t po = 0; probed[0] = '\0';
+        for (int p = 0; p < clients[i].probed_count; p++) {
+            char e[TRACKER_SSID_LEN * 2]; json_escape(clients[i].probed[p], e, sizeof(e));
+            int w = snprintf(probed + po, sizeof(probed) - po, "%s\"%s\"", p ? "," : "", e);
+            if (w > 0 && po + (size_t)w < sizeof(probed)) po += (size_t)w;
+        }
+        o += snprintf(buf + o, sizeof(buf) - o,
+            "%s{\"mac\":\"%s\",\"type\":\"%s\",\"rssi\":%d,"
+            "\"randomized\":%s,\"probed\":[%s],\"flags\":[%s]}",
+            first ? "" : ",", ms, dev_type_str(clients[i].type),
+            clients[i].signal_last, clients[i].randomized ? "true" : "false",
+            probed, fl);
+        first = 0;
+    }
+
+    if (o < LIMIT - 3) {
         o += snprintf(buf + o, sizeof(buf) - o, "]}");
         send_udp_json(buf);
     }
