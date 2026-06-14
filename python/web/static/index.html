@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WiFi Analyzer</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">📡</span>
+      <h1>WiFi&nbsp;Analyzer</h1>
+      <span id="conn" class="conn off" title="connection">offline</span>
+    </div>
+    <div class="kpis" id="kpis">
+      <div class="kpi"><span class="kpi-val" id="kpi-aps">0</span><span class="kpi-lbl">APs</span></div>
+      <div class="kpi"><span class="kpi-val" id="kpi-clients">0</span><span class="kpi-lbl">Clients</span></div>
+      <div class="kpi warn"><span class="kpi-val" id="kpi-threats">0</span><span class="kpi-lbl">Threats</span></div>
+      <div class="kpi"><span class="kpi-val" id="kpi-deauth">0</span><span class="kpi-lbl">Deauth</span></div>
+      <div class="kpi"><span class="kpi-val" id="kpi-pps">0</span><span class="kpi-lbl">pkts/s</span></div>
+    </div>
+  </header>
+
+  <div id="flood-banner" class="flood-banner hidden">⚠ DEAUTHENTICATION FLOOD IN PROGRESS</div>
+
+  <main class="grid">
+    <section class="card area-rssi">
+      <h2>RSSI over time <small>top APs</small></h2>
+      <div class="chart-wrap"><canvas id="rssiChart"></canvas></div>
+    </section>
+
+    <section class="card area-chan">
+      <h2>Channel × Signal</h2>
+      <div class="chart-wrap"><canvas id="chanChart"></canvas></div>
+    </section>
+
+    <section class="card area-aps">
+      <div class="card-head">
+        <h2>Access Points</h2>
+        <input id="ap-filter" class="filter" placeholder="filter…" autocomplete="off">
+      </div>
+      <div class="table-wrap">
+        <table id="ap-table">
+          <thead><tr>
+            <th data-key="bssid">BSSID</th>
+            <th data-key="ssid">SSID</th>
+            <th data-key="vendor">Vendor</th>
+            <th data-key="channel" class="num">Ch</th>
+            <th data-key="rssi" class="num">RSSI</th>
+            <th data-key="beacons" class="num">Beacons</th>
+            <th data-key="flags">Flags</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card area-threats">
+      <h2>Threats &amp; Findings</h2>
+      <ul id="threats" class="threats"></ul>
+    </section>
+
+    <section class="card area-clients">
+      <div class="card-head">
+        <h2>Client Stations</h2>
+        <input id="cli-filter" class="filter" placeholder="filter…" autocomplete="off">
+      </div>
+      <div class="table-wrap">
+        <table id="cli-table">
+          <thead><tr>
+            <th data-key="mac">MAC</th>
+            <th data-key="type">Type</th>
+            <th data-key="rssi" class="num">RSSI</th>
+            <th data-key="probed">Probed SSIDs</th>
+            <th data-key="flags">Flags</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card area-stream">
+      <h2>Live Stream</h2>
+      <div class="table-wrap stream-wrap">
+        <table id="stream-table">
+          <thead><tr>
+            <th>Time</th><th>Proto</th><th>Source</th><th>Dest</th><th>Info</th><th class="num">Sig</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

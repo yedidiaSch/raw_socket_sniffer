@@ -26,7 +26,7 @@ class PacketListener:
         """Reads all packets accumulated in buffer"""
         while True:
             try:
-                data, _ = self.sock.recvfrom(4096)
+                data, _ = self.sock.recvfrom(65535)
                 packet = json.loads(data.decode('utf-8'))
 
                 # Route the periodic security summary separately from packets.

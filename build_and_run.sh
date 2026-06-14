@@ -19,12 +19,30 @@ echo "   - Kills WiFi connection."
 echo "========================================"
 read -p "Enter choice [1 or 2]: " MODE_CHOICE
 
+# --- Step 1b: Ask User for Dashboard ---
+echo "========================================"
+echo "Select Dashboard:"
+echo "1) Web Dashboard (browser, live charts) [default]"
+echo "2) Terminal TUI (rich)"
+echo "========================================"
+read -p "Enter choice [1 or 2]: " DASH_CHOICE
+
 # --- Step 2: Build ---
 echo "Building Sniffer..."
 mkdir -p build && cd build && cmake .. && make
 if [ $? -ne 0 ]; then echo "Build failed."; exit 1; fi
 cd ..
 sudo -v # Refresh sudo
+
+# --- Step 2b: Web Dashboard Environment (one-time venv + deps) ---
+if [ "$DASH_CHOICE" != "2" ]; then
+    echo "Preparing web dashboard environment..."
+    if [ ! -d python/web/.venv ]; then
+        python3 -m venv python/web/.venv || { echo "venv creation failed."; exit 1; }
+    fi
+    python/web/.venv/bin/pip install -q -r python/web/requirements.txt \
+        || { echo "Dashboard dependency install failed (offline?)."; exit 1; }
+fi
 
 # --- Step 3: Execution Logic ---
 
@@ -116,5 +134,15 @@ echo "Logs -> sniffer.log"
 sudo ./build/Sniffer $CURRENT_INTERFACE > sniffer.log 2>&1 &
 SNIFFER_PID=$!
 
-echo "Starting Dashboard..."
-python3 python/app.py
+# --- Launch the chosen dashboard (foreground; Ctrl+C triggers cleanup) ---
+# Only one consumer can bind UDP 5005, so we run exactly one dashboard.
+if [ "$DASH_CHOICE" == "2" ]; then
+    echo "Starting Terminal Dashboard (TUI)..."
+    python3 python/app.py
+else
+    DASH_URL="http://127.0.0.1:8080"
+    echo "Starting Web Dashboard -> $DASH_URL  (Ctrl+C to stop)"
+    # Open the browser shortly after the server comes up.
+    ( sleep 2; xdg-open "$DASH_URL" >/dev/null 2>&1 || true ) &
+    python/web/.venv/bin/python python/web/server.py
+fi
